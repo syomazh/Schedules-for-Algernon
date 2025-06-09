@@ -691,7 +691,7 @@
                 localStorage.setItem('theme', 'light');
             } else {
                 applyTheme('dark');
-                localStorage.setItem('theme', 'dark');
+                localStorage.setItem('dark');
             }
         });
 
@@ -729,9 +729,9 @@
                     const listItem = document.createElement('li');
                     listItem.className = 'flex justify-between items-center bg-gray-200 dark:bg-gray-700 p-3 rounded-md shadow-sm';
                     
-                    const periodsDisplay = course.periodHours.join(', ');
+                    // Only display the course name
                     listItem.innerHTML = `
-                        <span class="font-medium text-gray-800 dark:text-gray-100">${course.name} <span class="text-sm text-gray-600 dark:text-gray-300">(${periodsDisplay})</span></span>
+                        <span class="font-medium text-gray-800 dark:text-gray-100">${course.name}</span>
                         <button data-index="${index}" class="remove-btn bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Remove</button>
                     `;
                     highSchoolCoursesList.appendChild(listItem);
