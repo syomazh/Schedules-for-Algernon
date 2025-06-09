@@ -339,13 +339,27 @@
         }
 
         class CollegeClass {
-            constructor(name, days, startTime, endTime, color) {
+            // sections is now an array of objects: [{ days: [], startTime: '', endTime: '' }, ...]
+            constructor(name, sections, color) {
                 this.name = name;
-                this.days = days;
-                this.startTime = startTime;
-                this.endTime = endTime;
+                this.sections = sections; // Array of section objects
                 this.color = color;
                 this.type = 'College Class';
+                this.renderableEvents = []; // This will hold the actual events to be rendered
+
+                this.sections.forEach(section => {
+                    section.days.forEach(day => {
+                        this.renderableEvents.push({
+                            name: this.name,
+                            day: day,
+                            startTime: section.startTime,
+                            endTime: section.endTime,
+                            color: this.color,
+                            type: this.type,
+                            period: null // College classes don't have school periods
+                        });
+                    });
+                });
             }
         }
 
@@ -394,7 +408,11 @@
         // Example Course Objects
         const courses = [
             new SchoolClass('High School Class', ['1st Hour', '4th Hour', '5th Hour', 'Advisory'], 'bg-custom-blue'),
-            new CollegeClass('College Class', ['Mon', 'Wed'], '09:00', '10:15', 'bg-custom-yellow'),
+            // Updated College Class example with multiple sections
+            new CollegeClass('College Class', [
+                { days: ['Wed', 'Fri'], startTime: '14:00', endTime: '15:00' },
+                { days: ['Tue', 'Thu'], startTime: '08:00', endTime: '09:00' }
+            ], 'bg-custom-yellow'),
         ];
 
         // Available colors for new courses
@@ -509,20 +527,8 @@
 
             const allRenderableEvents = [];
             courses.forEach(course => {
-                if (course.type === 'School Class') {
+                if (course.type === 'School Class' || course.type === 'College Class') {
                     allRenderableEvents.push(...course.renderableEvents);
-                } else {
-                    course.days.forEach(day => {
-                        allRenderableEvents.push({
-                            name: course.name,
-                            day: day,
-                            startTime: course.startTime,
-                            endTime: course.endTime,
-                            color: course.color,
-                            type: course.type,
-                            period: null
-                        });
-                    });
                 }
             });
 
