@@ -280,17 +280,6 @@
             color: #ef4444; /* Ensure this remains red */
         }
 
-        .panel-toggle-button {
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .panel-toggle-button.rotated-left {
-            transform: rotate(180deg);
-        }
-        .panel-toggle-button.rotated-right {
-            transform: rotate(0deg);
-        }
-
         /* Adjust Main Content Area to allow schedule to grow */
         .main-content-area {
             display: flex;
@@ -350,12 +339,6 @@
             .controls-panel.collapsed h2 {
                 display: block; /* Show heading on small screen collapse */
             }
-            .panel-toggle-button.rotated-left {
-                transform: rotate(90deg); /* Rotate for vertical collapse */
-            }
-            .panel-toggle-button.rotated-right {
-                transform: rotate(-90deg); /* Rotate for vertical collapse */
-            }
         }
     </style>
 </head>
@@ -373,9 +356,6 @@
         <div id="collegePanel" class="controls-panel w-full md:w-1/4 p-6 rounded-xl shadow-xl space-y-6">
             <div class="panel-header flex justify-between items-center">
                 <h2 class="text-2xl font-bold mb-4">Add College Course</h2>
-                <button class="panel-toggle-button md:rotated-left p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                </button>
             </div>
             <div class="panel-content space-y-6">
                 <div>
@@ -434,9 +414,6 @@
         <div id="highSchoolPanel" class="controls-panel w-full md:w-1/4 p-6 rounded-xl shadow-xl space-y-6">
             <div class="panel-header flex justify-between items-center">
                 <h2 class="text-2xl font-bold mb-4">Add High School Course</h2>
-                <button class="panel-toggle-button md:rotated-right p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                </button>
             </div>
             <div class="panel-content space-y-6">
                 <div>
@@ -1123,88 +1100,7 @@
             renderCollegeCoursesList();
         }
 
-        // --- Panel Collapse Functionality ---
-        function setupPanelToggle(panelId, toggleButtonClass, initialCollapsed = false) {
-            const panel = document.getElementById(panelId);
-            const toggleButton = panel.querySelector(`.${toggleButtonClass}`);
-            const panelContent = panel.querySelector('.panel-content');
-            const h2Element = panel.querySelector('h2'); // Get the h2 element within the panel
-
-            if (!panel || !toggleButton || !panelContent || !h2Element) {
-                console.error(`Missing elements for panel setup: ${panelId}`);
-                return;
-            }
-
-            // Initial state based on initialCollapsed param
-            if (initialCollapsed) {
-                panel.classList.add('collapsed');
-                toggleButton.classList.add('rotated-right'); // Assuming it's left, rotate it right
-            } else {
-                toggleButton.classList.add('rotated-left'); // Default to left-arrow/normal
-            }
-             // On small screens, always collapse by default height-wise
-            const isSmallScreen = window.innerWidth <= 768;
-            if (isSmallScreen && initialCollapsed) {
-                panel.classList.add('collapsed');
-                 // Adjust class for mobile rotation
-                if (toggleButton.classList.contains('rotated-left')) {
-                    toggleButton.classList.remove('rotated-left');
-                }
-                if (toggleButton.classList.contains('rotated-right')) {
-                     toggleButton.classList.remove('rotated-right');
-                }
-                 toggleButton.style.transform = 'rotate(-90deg)'; // Arrow pointing down
-            } else if (isSmallScreen && !initialCollapsed) {
-                 // For expanded panels on small screens, adjust arrow direction if needed.
-                 // This ensures arrow points up when expanded, or down when collapsed vertically.
-                 if (toggleButton.classList.contains('rotated-left')) {
-                    toggleButton.classList.remove('rotated-left');
-                }
-                if (toggleButton.classList.contains('rotated-right')) {
-                     toggleButton.classList.remove('rotated-right');
-                }
-                toggleButton.style.transform = 'rotate(90deg)'; // Arrow pointing up
-            }
-
-
-            toggleButton.addEventListener('click', () => {
-                panel.classList.toggle('collapsed');
-                
-                // Toggle rotation based on whether the panel is collapsed or not
-                const isCollapsed = panel.classList.contains('collapsed');
-                if (window.innerWidth > 768) { // Desktop collapse (horizontal)
-                    if (panelId === 'collegePanel') { // Left panel
-                        if (isCollapsed) {
-                            toggleButton.classList.remove('rotated-left');
-                            toggleButton.classList.add('rotated-right');
-                        } else {
-                            toggleButton.classList.remove('rotated-right');
-                            toggleButton.classList.add('rotated-left');
-                        }
-                    } else if (panelId === 'highSchoolPanel') { // Right panel
-                        if (isCollapsed) {
-                            toggleButton.classList.remove('rotated-right');
-                            toggleButton.classList.add('rotated-left');
-                        } else {
-                            toggleButton.classList.remove('rotated-left');
-                            toggleButton.classList.add('rotated-right');
-                        }
-                    }
-                } else { // Mobile collapse (vertical)
-                    // On mobile, the h2 is always visible. Toggle button only for collapsing content
-                    if (isCollapsed) {
-                        toggleButton.style.transform = 'rotate(-90deg)'; // Point down (collapsed)
-                    } else {
-                        toggleButton.style.transform = 'rotate(90deg)'; // Point up (expanded)
-                    }
-                }
-                // Hide/show the h2 for horizontal collapse only
-                if (window.innerWidth > 768) {
-                    h2Element.style.display = isCollapsed ? 'none' : 'block';
-                }
-            });
-        }
-
+       
 
         // Initial rendering and updates
         window.addEventListener('load', () => {
@@ -1216,10 +1112,6 @@
             generateCollegeSectionInputs(); // Generate initial section inputs
             updateCurrentTimeLine();
             setInterval(updateCurrentTimeLine, 60 * 1000);
-
-            // Setup collapsible panels
-            setupPanelToggle('collegePanel', 'panel-toggle-button');
-            setupPanelToggle('highSchoolPanel', 'panel-toggle-button');
         });
 
         window.addEventListener('resize', () => {
@@ -1232,12 +1124,6 @@
             renderCourses(); // Re-render dynamic courses with updated layout
 
             updateCurrentTimeLine();
-            // Re-evaluate panel collapse on resize for mobile/desktop toggle
-            const collegePanel = document.getElementById('collegePanel');
-            const hsPanel = document.getElementById('highSchoolPanel');
-            const collegeToggle = collegePanel.querySelector('.panel-toggle-button');
-            const hsToggle = hsPanel.querySelector('.panel-toggle-button');
-            const isSmallScreen = window.innerWidth <= 768;
 
             // Reset classes based on current screen size and panel's collapse state
             if (isSmallScreen) {
