@@ -199,6 +199,14 @@
                 font-size: 0.875rem; /* text-sm */
                 padding: 0.5rem 0.25rem;
             }
+            /* Adjust layout for small screens */
+            .main-content-area {
+                flex-direction: column;
+            }
+            .schedule-panel, .controls-panel {
+                width: 100%;
+                margin-bottom: 1rem; /* Add some space between panels */
+            }
         }
     </style>
 </head>
@@ -211,27 +219,56 @@
         </button>
     </div>
 
-    <div id="scheduleContainer" class="w-full max-w-7xl shadow-xl rounded-xl">
-        <div class="calendar-grid min-h-[600px] md:min-h-[700px]">
-            <div class="day-header border-none"></div> <!-- Empty corner -->
-            <div class="day-header">Mon</div>
-            <div class="day-header">Tue</div>
-            <div class="day-header">Wed</div>
-            <div class="day-header">Thu</div>
-            <div class="day-header">Fri</div>
+    <div class="main-content-area flex flex-col md:flex-row w-full max-w-7xl gap-6">
+        <!-- Main Schedule Container -->
+        <div id="scheduleContainer" class="schedule-panel w-full md:w-3/4 shadow-xl rounded-xl">
+            <div class="calendar-grid min-h-[600px] md:min-h-[700px]">
+                <div class="day-header border-none"></div> <!-- Empty corner -->
+                <div class="day-header">Mon</div>
+                <div class="day-header">Tue</div>
+                <div class="day-header">Wed</div>
+                <div class="day-header">Thu</div>
+                <div class="day-header">Fri</div>
 
-            <div class="time-column" id="timeColumn">
-                <!-- Time labels will be dynamically generated here -->
+                <div class="time-column" id="timeColumn">
+                    <!-- Time labels will be dynamically generated here -->
+                </div>
+
+                <div class="schedule-content" id="scheduleContent">
+                    <div class="day-column" id="monColumn"></div>
+                    <div class="day-column" id="tueColumn"></div>
+                    <div class="day-column" id="wedColumn"></div>
+                    <div class="day-column" id="thuColumn"></div>
+                    <div class="day-column" id="friColumn"></div>
+                    <!-- Current time line will be appended here -->
+                    <div id="currentTimeLine" class="current-time-line hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Panel for Adding/Removing Courses -->
+        <div class="controls-panel w-full md:w-1/4 p-6 bg-gray-100 dark:bg-gray-800 rounded-xl shadow-xl space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Add High School Course</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="courseNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Name:</label>
+                        <input type="text" id="courseNameInput" placeholder="e.g., Algebra II" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    </div>
+                    <div>
+                        <label for="periodHoursInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Hours Offered (comma-separated):</label>
+                        <input type="text" id="periodHoursInput" placeholder="e.g., 1st Hour, 4th Hour, Advisory" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Examples: "1st Hour", "Advisory", "5th Hour"</p>
+                    </div>
+                    <button id="addCourseBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Add Course</button>
+                </div>
             </div>
 
-            <div class="schedule-content" id="scheduleContent">
-                <div class="day-column" id="monColumn"></div>
-                <div class="day-column" id="tueColumn"></div>
-                <div class="day-column" id="wedColumn"></div>
-                <div class="day-column" id="thuColumn"></div>
-                <div class="day-column" id="friColumn"></div>
-                <!-- Current time line will be appended here -->
-                <div id="currentTimeLine" class="current-time-line hidden"></div>
+            <div>
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">My High School Courses</h2>
+                <ul id="highSchoolCoursesList" class="space-y-2">
+                    <!-- High school courses will be dynamically listed here -->
+                </ul>
             </div>
         </div>
     </div>
@@ -250,15 +287,13 @@
 
     <script>
         // Data Structures for Classes
-        // Re-defining SchoolClass to derive days and times from the periodHour
         class SchoolClass {
-            // periodHours is now an array, e.g., ['1st Hour', '4th Hour']
             constructor(name, periodHours, color) {
                 this.name = name;
                 this.periodHours = periodHours; // Array of period strings
                 this.color = color;
                 this.type = 'School Class';
-                this.renderableEvents = []; // This will hold the actual events to be rendered
+                this.renderableEvents = [];
 
                 const normalDays = ['Mon', 'Tue', 'Fri'];
                 const blockDaysMap = {
@@ -278,7 +313,7 @@
                                 endTime: times.end,
                                 color: this.color,
                                 type: this.type,
-                                period: periodHour // Store the specific period hour for this event
+                                period: periodHour
                             });
                         }
                     });
@@ -295,7 +330,7 @@
                                 endTime: times.end,
                                 color: this.color,
                                 type: this.type,
-                                period: periodHour // Store the specific period hour for this event
+                                period: periodHour
                             });
                         }
                     }
@@ -306,28 +341,25 @@
         class CollegeClass {
             constructor(name, days, startTime, endTime, color) {
                 this.name = name;
-                this.days = days; // Array of 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'
-                this.startTime = startTime; // "HH:MM"
-                this.endTime = endTime;     // "HH:MM"
+                this.days = days;
+                this.startTime = startTime;
+                this.endTime = endTime;
                 this.color = color;
                 this.type = 'College Class';
             }
         }
 
-        // Detailed school hour schedule mapping for each individual period hour on each day type.
-        // This allows school classes to automatically find their correct time slots across normal and block days.
         const SCHOOL_HOUR_SCHEDULE = {
             'Mon': {
                 '1st Hour': { start: '07:40', end: '08:32' },
                 '2nd Hour': { start: '08:37', end: '09:29' },
                 '3rd Hour': { start: '09:34', end: '10:26' },
                 '4th Hour': { start: '10:31', end: '11:23' },
-                // 5th Period & Lunch: representing the full block span
                 '5th Hour': { start: '11:23', end: '12:56' },
                 '6th Hour': { start: '13:01', end: '13:53' },
                 '7th Hour': { start: '13:58', end: '14:50' },
             },
-            'Tue': { // Same schedule as Monday
+            'Tue': {
                 '1st Hour': { start: '07:40', end: '08:32' },
                 '2nd Hour': { start: '08:37', end: '09:29' },
                 '3rd Hour': { start: '09:34', end: '10:26' },
@@ -336,21 +368,19 @@
                 '6th Hour': { start: '13:01', end: '13:53' },
                 '7th Hour': { start: '13:58', end: '14:50' },
             },
-            'Wed': { // Blue Day Block Schedule
-                '1st Hour': { start: '07:40', end: '09:13' }, // Mapped to 1st Block
-                'Advisory': { start: '09:20', end: '10:53' }, // Mapped to Advisory Block
-                // 2nd Block & Lunch: representing the full block span
-                '2nd Hour': { start: '10:53', end: '13:10' }, // Mapped to 2nd Block
-                '3rd Hour': { start: '13:17', end: '14:50' }, // Mapped to 3rd Block
+            'Wed': {
+                '1st Hour': { start: '07:40', end: '09:13' },
+                'Advisory': { start: '09:20', end: '10:53' },
+                '2nd Hour': { start: '10:53', end: '13:10' },
+                '3rd Hour': { start: '13:17', end: '14:50' },
             },
-            'Thu': { // Red Day Block Schedule
-                '4th Hour': { start: '07:40', end: '09:13' }, // Mapped to 4th Block
-                '5th Hour': { start: '09:20', end: '10:53' }, // Mapped to 5th Block
-                // 6th Block & Lunch: representing the full block span
-                '6th Hour': { start: '10:53', end: '13:10' }, // Mapped to 6th Block
-                '7th Hour': { start: '13:17', end: '14:50' }, // Mapped to 7th Block
+            'Thu': {
+                '4th Hour': { start: '07:40', end: '09:13' },
+                '5th Hour': { start: '09:20', end: '10:53' },
+                '6th Hour': { start: '10:53', end: '13:10' },
+                '7th Hour': { start: '13:17', end: '14:50' },
             },
-            'Fri': { // Same schedule as Monday
+            'Fri': {
                 '1st Hour': { start: '07:40', end: '08:32' },
                 '2nd Hour': { start: '08:37', end: '09:29' },
                 '3rd Hour': { start: '09:34', end: '10:26' },
@@ -361,24 +391,24 @@
             }
         };
 
-
-        // Example Course Objects - Updated for new SchoolClass constructor
+        // Example Course Objects
         const courses = [
-            // School Classes: Now takes an array of period hours
             new SchoolClass('High School Class', ['1st Hour', '4th Hour', '5th Hour', 'Advisory'], 'bg-custom-blue'),
-
-            // College Classes: Still require explicit days and times
             new CollegeClass('College Class', ['Mon', 'Wed'], '09:00', '10:15', 'bg-custom-yellow'),
         ];
 
-        // Schedule Configuration - Defines the overall grid time range and days
-        const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-        const START_HOUR = 7; // 7 AM
-        const END_HOUR = 15; // 3 PM (ends 2:50 PM, so 3 PM is safe boundary for grid height)
-        const TOTAL_MINUTES_SPAN = (END_HOUR - START_HOUR) * 60; // Total minutes covered by the schedule grid (8 hours * 60 minutes = 480 minutes)
+        // Available colors for new courses
+        const availableColors = [
+            'bg-custom-green', 'bg-custom-purple', 'bg-custom-pink',
+            'bg-custom-teal', 'bg-custom-orange', 'bg-custom-red-500'
+        ];
+        let colorIndex = 0; // To cycle through colors
 
-        // School Period Definitions (for background blocks, these are overall blocks)
-        // These define the visual sections of the school day.
+        const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        const START_HOUR = 7;
+        const END_HOUR = 15;
+        const TOTAL_MINUTES_SPAN = (END_HOUR - START_HOUR) * 60;
+
         const schoolPeriods = {
             'Mon': [
                 { name: '1st Period', start: '07:40', end: '08:32', label: '' },
@@ -398,13 +428,13 @@
                 { name: '6th Period', start: '13:01', end: '13:53', label: '' },
                 { name: '7th Period', start: '13:58', end: '14:50', label: '' },
             ],
-            'Wed': [ // Blue Day - Block schedule periods
+            'Wed': [
                 { name: '1st Block', start: '07:40', end: '09:13', label: '' },
                 { name: 'Advisory Block', start: '09:20', end: '10:53', label: 'Advisory' },
                 { name: '2nd Block & Lunch', start: '10:53', end: '13:10', label: '' },
                 { name: '3rd Block', start: '13:17', end: '14:50', label: '' },
             ],
-            'Thu': [ // Red Day - Block schedule periods
+            'Thu': [
                 { name: '4th Block', start: '07:40', end: '09:13', label: '' },
                 { name: '5th Block', start: '09:20', end: '10:53', label: '' },
                 { name: '6th Block & Lunch', start: '10:53', end: '13:10', label: '' },
@@ -421,13 +451,11 @@
             ]
         };
 
-        // Utility function to convert "HH:MM" time string to minutes from START_HOUR
         function timeToMinutes(timeStr) {
             const [hours, minutes] = timeStr.split(':').map(Number);
             return (hours - START_HOUR) * 60 + minutes;
         }
 
-        // Utility function to format minutes back to "HH:MM AM/PM" string
         function formatMinutesToTime(minutes) {
             const totalMinutes = START_HOUR * 60 + minutes;
             const hours = Math.floor(totalMinutes / 60);
@@ -437,7 +465,6 @@
             return `${displayHours}:${mins.toString().padStart(2, '0')} ${ampm}`;
         }
 
-        // Function to create and append background period blocks in the schedule grid
         function renderPeriodBlocks() {
             DAYS.forEach(day => {
                 const dayColumn = document.getElementById(`${day.toLowerCase()}Column`);
@@ -453,16 +480,15 @@
                     periodBlock.className = 'period-block';
                     periodBlock.style.top = `${topPercentage}%`;
                     periodBlock.style.height = `${heightPercentage}%`;
-                    periodBlock.innerHTML = `<div class="p-1">${period.label}</div>`; // Label for the period block
+                    periodBlock.innerHTML = `<div class="p-1">${period.label}</div>`;
                     dayColumn.appendChild(periodBlock);
                 });
             });
         }
 
-        // Function to render time labels in the leftmost time column
         function renderTimeLabels() {
             const timeColumn = document.getElementById('timeColumn');
-            const intervalMinutes = 60; // Display a time label every hour
+            const intervalMinutes = 60;
             for (let i = 0; i <= TOTAL_MINUTES_SPAN; i += intervalMinutes) {
                 const labelTime = formatMinutesToTime(i);
                 const timeLabelDiv = document.createElement('div');
@@ -473,20 +499,19 @@
             }
         }
 
-        // Function to render courses on the schedule grid
         function renderCourses() {
             const dayColumns = {};
             DAYS.forEach(day => {
-                dayColumns[day] = document.getElementById(`${day.toLowerCase()}Column`);
+                const column = document.getElementById(`${day.toLowerCase()}Column`);
+                if (column) column.innerHTML = ''; // Clear existing events
+                dayColumns[day] = column;
             });
 
-            // Collect all individual events to be rendered, flattening SchoolClass.renderableEvents
             const allRenderableEvents = [];
             courses.forEach(course => {
                 if (course.type === 'School Class') {
-                    // For School Classes, use the pre-generated renderableEvents
                     allRenderableEvents.push(...course.renderableEvents);
-                } else { // For College Classes, create renderable event objects directly
+                } else {
                     course.days.forEach(day => {
                         allRenderableEvents.push({
                             name: course.name,
@@ -495,16 +520,15 @@
                             endTime: course.endTime,
                             color: course.color,
                             type: course.type,
-                            period: null // College classes don't have school periods
+                            period: null
                         });
                     });
                 }
             });
 
-            // Now, iterate through all collected events and dynamically create their HTML elements
             allRenderableEvents.forEach(eventToRender => {
                 const dayColumn = dayColumns[eventToRender.day];
-                if (!dayColumn) return; // Skip if day column not found
+                if (!dayColumn) return;
 
                 const startMinutes = timeToMinutes(eventToRender.startTime);
                 const endMinutes = timeToMinutes(eventToRender.endTime);
@@ -514,27 +538,24 @@
                 const heightPercentage = (durationMinutes / TOTAL_MINUTES_SPAN) * 100;
 
                 const eventSlot = document.createElement('div');
-                eventSlot.className = `event-slot ${eventToRender.color} text-white truncate`; // Added truncate for long names
+                eventSlot.className = `event-slot ${eventToRender.color} text-white truncate`;
                 eventSlot.style.top = `${topPercentage}%`;
                 eventSlot.style.height = `${heightPercentage}%`;
                 eventSlot.innerHTML = `
                     <p class="font-semibold text-white">${eventToRender.name}</p>
                     <p class="text-xs text-gray-100">${eventToRender.startTime} - ${eventToRender.endTime}</p>
                 `;
-                // Add click listener to show modal with detailed event information
                 eventSlot.addEventListener('click', () => showEventModal(eventToRender));
                 dayColumn.appendChild(eventSlot);
             });
 
-            // Adjust positions for overlapping events within each day column to prevent full occlusion
             DAYS.forEach(day => {
                 const dayColumn = dayColumns[day];
                 const events = Array.from(dayColumn.querySelectorAll('.event-slot'));
 
-                // Sort events by their start time (top position) to process overlaps correctly
                 events.sort((a, b) => parseFloat(a.style.top) - parseFloat(b.style.top));
 
-                const occupiedSlots = []; // Stores { start: percent, end: percent, element: eventSlot, lane: number }
+                const occupiedSlots = [];
 
                 events.forEach(eventSlot => {
                     const eventTop = parseFloat(eventSlot.style.top);
@@ -542,10 +563,8 @@
                     const eventBottom = eventTop + eventHeight;
 
                     let laneFound = false;
-                    // Iterate through potential lanes (up to 5 to avoid excessive shrinking)
                     for (let lane = 0; lane < 5; lane++) {
                         let canFitInLane = true;
-                        // Check if the current event overlaps with any event already placed in this lane
                         for (const slot of occupiedSlots) {
                             if (slot.lane === lane && eventTop < slot.end && eventBottom > slot.start) {
                                 canFitInLane = false;
@@ -553,112 +572,92 @@
                             }
                         }
                         if (canFitInLane) {
-                            // If no overlap in this lane, assign the event to it
                             occupiedSlots.push({ start: eventTop, end: eventBottom, element: eventSlot, lane: lane });
-                            eventSlot.dataset.lane = lane; // Store the assigned lane in a dataset attribute
+                            eventSlot.dataset.lane = lane;
                             laneFound = true;
                             break;
                         }
                     }
                     if (!laneFound) {
-                        // Fallback: If no free lane is found after trying several, just stack it in lane 0.
-                        // This scenario indicates many simultaneous overlaps.
                         console.warn(`Could not find an empty lane for event: ${eventSlot.textContent}. Stacking in lane 0.`);
                         eventSlot.dataset.lane = 0;
                         occupiedSlots.push({ start: eventTop, end: eventBottom, element: eventSlot, lane: 0 });
                     }
                 });
 
-                // After all events are assigned a lane, make a second pass to update their width and left position.
-                // This is crucial because the total number of lanes (maxLanes) might increase as more events are processed.
-                const maxLanes = Math.max(0, ...occupiedSlots.map(s => s.lane)) + 1; // Determine the total number of lanes used
+                const maxLanes = Math.max(0, ...occupiedSlots.map(s => s.lane)) + 1;
                 for (const slot of occupiedSlots) {
                     const eventLane = parseInt(slot.element.dataset.lane);
-                    slot.element.style.width = `${100 / maxLanes}%`; // Divide width among all active lanes
-                    slot.element.style.left = `${(eventLane / maxLanes) * 100}%`; // Position based on lane
+                    slot.element.style.width = `${100 / maxLanes}%`;
+                    slot.element.style.left = `${(eventLane / maxLanes) * 100}%`;
                 }
             });
         }
 
-        // Function to update the current time line (no changes needed)
         function updateCurrentTimeLine() {
             const currentTimeLine = document.getElementById('currentTimeLine');
             const now = new Date();
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
 
-            // Only show the line if the current time falls within the schedule's defined hours
             if (currentHour >= START_HOUR && currentHour < END_HOUR) {
                 const minutesFromStart = (currentHour - START_HOUR) * 60 + currentMinute;
                 const topPercentage = (minutesFromStart / TOTAL_MINUTES_SPAN) * 100;
                 currentTimeLine.style.top = `${topPercentage}%`;
-                currentTimeLine.classList.remove('hidden'); // Show the line
+                currentTimeLine.classList.remove('hidden');
 
-                // Determine which day column the line should span (if today is a scheduled day)
                 const today = new Date().toLocaleString('en-US', { weekday: 'short' });
                 const dayIndex = DAYS.indexOf(today);
 
                 if (dayIndex !== -1) {
-                    // Set grid column for the line to span across the correct day column
-                    // (+2 because of the time column (index 1) and grid-column starting from 1)
                     currentTimeLine.style.gridColumn = `${dayIndex + 2} / span 1`;
                 } else {
-                    currentTimeLine.classList.add('hidden'); // Hide if today is not a scheduled day
+                    currentTimeLine.classList.add('hidden');
                 }
-
             } else {
-                currentTimeLine.classList.add('hidden'); // Hide if outside schedule hours
+                currentTimeLine.classList.add('hidden');
             }
         }
 
-
-        // Modal functions for displaying event details
         const eventModal = document.getElementById('eventModal');
         const modalTitle = document.getElementById('modalTitle');
         const modalType = document.getElementById('modalType');
-        const modalDays = document.getElementById('modalDays'); // Now displays a single day for individual events
+        const modalDays = document.getElementById('modalDays');
         const modalTime = document.getElementById('modalTime');
         const modalPeriod = document.getElementById('modalPeriod');
         const modalPeriodText = document.getElementById('modalPeriodText');
         const closeModalBtn = document.getElementById('closeModal');
 
-        // Function to show the event details modal
-        // It now expects an 'eventDetails' object (which is a single renderable event)
         function showEventModal(eventDetails) {
             modalTitle.textContent = eventDetails.name;
             modalType.textContent = eventDetails.type;
-            modalDays.textContent = eventDetails.day; // Displays the specific day of the event
+            modalDays.textContent = eventDetails.day;
             modalTime.textContent = `${eventDetails.startTime} - ${eventDetails.endTime}`;
 
-            // Show period information only for School Classes that have a period defined
             if (eventDetails.type === 'School Class' && eventDetails.period) {
                 modalPeriod.classList.remove('hidden');
                 modalPeriodText.textContent = eventDetails.period;
             } else {
-                modalPeriod.classList.add('hidden'); // Hide if not a school class or no period
+                modalPeriod.classList.add('hidden');
             }
 
-            eventModal.classList.remove('hidden'); // Display the modal
+            eventModal.classList.remove('hidden');
         }
 
-        // Event listener to close the modal when the close button is clicked
         closeModalBtn.addEventListener('click', () => {
             eventModal.classList.add('hidden');
         });
 
-        // Event listener to close the modal when clicking outside the modal content
         eventModal.addEventListener('click', (e) => {
             if (e.target === eventModal) {
                 eventModal.classList.add('hidden');
             }
         });
 
-        // Dark Mode Toggle functionality
         const darkModeToggle = document.getElementById('darkModeToggle');
         const sunIcon = document.getElementById('sunIcon');
         const moonIcon = document.getElementById('moonIcon');
 
-        // Function to apply the chosen theme (light or dark)
         function applyTheme(theme) {
             if (theme === 'dark') {
                 document.documentElement.classList.add('dark');
@@ -671,7 +670,6 @@
             }
         }
 
-        // Check for saved theme preference in local storage or system preference on load
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
             applyTheme(savedTheme);
@@ -681,7 +679,6 @@
             applyTheme('light');
         }
 
-        // Event listener for the dark mode toggle button
         darkModeToggle.addEventListener('click', () => {
             if (document.documentElement.classList.contains('dark')) {
                 applyTheme('light');
@@ -692,22 +689,117 @@
             }
         });
 
+        // --- New Functionality for Add/Remove Courses ---
 
-        // Initial rendering of the schedule and continuous updates
-        window.addEventListener('load', () => {
-            renderTimeLabels();      // Render time labels on the left
-            renderPeriodBlocks();    // Render background period divisions
-            renderCourses();         // Render all school and college courses
-            updateCurrentTimeLine(); // Initial positioning of the current time line
-            setInterval(updateCurrentTimeLine, 60 * 1000); // Update the time line every minute
+        const courseNameInput = document.getElementById('courseNameInput');
+        const periodHoursInput = document.getElementById('periodHoursInput');
+        const addCourseBtn = document.getElementById('addCourseBtn');
+        const highSchoolCoursesList = document.getElementById('highSchoolCoursesList');
+
+        // Utility to parse user input for period hours
+        function parsePeriodHoursInput(inputString) {
+            const periodMap = {
+                '1': '1st Hour', '1st': '1st Hour', '1st Hour': '1st Hour',
+                '2': '2nd Hour', '2nd': '2nd Hour', '2nd Hour': '2nd Hour',
+                '3': '3rd Hour', '3rd': '3rd Hour', '3rd Hour': '3rd Hour',
+                '4': '4th Hour', '4th': '4th Hour', '4th Hour': '4th Hour',
+                '5': '5th Hour', '5th': '5th Hour', '5th Hour': '5th Hour',
+                '6': '6th Hour', '6th': '6th Hour', '6th Hour': '6th Hour',
+                '7': '7th Hour', '7th': '7th Hour', '7th Hour': '7th Hour',
+                'advisory': 'Advisory', 'Advisory': 'Advisory'
+            };
+            return inputString.split(',')
+                              .map(s => s.trim())
+                              .filter(s => s !== '')
+                              .map(s => periodMap[s.toLowerCase()] || s); // Convert to lowercase for map lookup
+        }
+
+        // Function to render the list of high school courses in the side panel
+        function renderHighSchoolCoursesList() {
+            highSchoolCoursesList.innerHTML = ''; // Clear existing list
+
+            courses.forEach((course, index) => {
+                if (course.type === 'School Class') {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'flex justify-between items-center bg-gray-200 dark:bg-gray-700 p-3 rounded-md shadow-sm';
+                    
+                    const periodsDisplay = course.periodHours.join(', ');
+                    listItem.innerHTML = `
+                        <span class="font-medium text-gray-800 dark:text-gray-100">${course.name} <span class="text-sm text-gray-600 dark:text-gray-300">(${periodsDisplay})</span></span>
+                        <button data-index="${index}" class="remove-btn bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Remove</button>
+                    `;
+                    highSchoolCoursesList.appendChild(listItem);
+                }
+            });
+
+            // Add event listeners to newly created remove buttons
+            document.querySelectorAll('.remove-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const indexToRemove = parseInt(event.target.dataset.index);
+                    removeCourse(indexToRemove);
+                });
+            });
+        }
+
+        // Function to add a new high school course
+        addCourseBtn.addEventListener('click', () => {
+            const name = courseNameInput.value.trim();
+            const periodHoursString = periodHoursInput.value.trim();
+
+            if (!name || !periodHoursString) {
+                alert('Please enter both course name and hours offered.'); // Replace with custom modal later if desired
+                return;
+            }
+
+            const periodHours = parsePeriodHoursInput(periodHoursString);
+
+            // Simple validation for period hours (check if at least one valid period is found)
+            const hasValidPeriod = periodHours.some(ph => {
+                // Check if the periodHour exists in any day's schedule
+                return Object.values(SCHOOL_HOUR_SCHEDULE).some(daySchedule => daySchedule[ph]);
+            });
+
+            if (!hasValidPeriod) {
+                alert('Please enter valid period hours (e.g., "1st Hour", "Advisory", "4th Hour").');
+                return;
+            }
+
+            // Assign a new color by cycling through the available colors
+            const newColor = availableColors[colorIndex % availableColors.length];
+            colorIndex++;
+
+            const newCourse = new SchoolClass(name, periodHours, newColor);
+            courses.push(newCourse);
+
+            courseNameInput.value = '';
+            periodHoursInput.value = '';
+
+            // Re-render everything
+            renderCourses();
+            renderHighSchoolCoursesList();
         });
 
-        // Re-render the schedule elements on window resize to ensure responsiveness
+        // Function to remove a course
+        function removeCourse(index) {
+            courses.splice(index, 1); // Remove the course at the given index
+            renderCourses();          // Re-render the schedule
+            renderHighSchoolCoursesList(); // Re-render the list in the panel
+        }
+
+        // Initial rendering and updates
+        window.addEventListener('load', () => {
+            renderTimeLabels();
+            renderPeriodBlocks();
+            renderCourses();
+            renderHighSchoolCoursesList(); // Render the initial list of high school courses
+            updateCurrentTimeLine();
+            setInterval(updateCurrentTimeLine, 60 * 1000);
+        });
+
         window.addEventListener('resize', () => {
-            // Clear existing elements before re-rendering to avoid duplicates or incorrect positioning
             DAYS.forEach(day => {
                 const dayColumn = document.getElementById(`${day.toLowerCase()}Column`);
-                dayColumn.innerHTML = ''; // Clear contents of each day column
+                dayColumn.innerHTML = '';
             });
             renderPeriodBlocks();
             renderCourses();
