@@ -9,32 +9,57 @@
     <style>
         /* Custom styles for dark mode and soft colors */
         :root {
-            --bg-color: #f0f4f8; /* Light background */
-            --text-color: #334155; /* Dark slate */
+            --bg-color: #f0f4f8; /* Light background for overall body */
+            --main-text-color: #1a202c; /* Near-black for main titles and body text in light mode */
+            --panel-heading-color: #1a202c; /* Explicitly dark for panel headings */
+            --label-color: #4a5568; /* Slightly softer dark for labels in light mode */
+            --secondary-text-color: #718096; /* Darker grey for secondary text in light mode */
             --border-color: #e2e8f0; /* Light gray border */
-            --header-bg-color: #cbd5e1; /* Medium gray for headers */
-            --period-time-bg: #e2e8f0;
-            --period-time-text: #475569;
+            --header-bg-color: #cbd5e1; /* Medium gray for day headers */
+            --period-time-bg: #e2e8f0; /* Background for time column */
+            --period-time-text: #475569; /* Text for time column */
             --overlay-bg: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay for modal */
             --modal-bg: #ffffff; /* White modal background */
+
+            /* Variables for panel styling */
+            --panel-bg: #ffffff; /* Light background for control panels */
+            --panel-item-bg: #f8fafc; /* Lighter background for list items/section groups */
+            --input-bg: #ffffff; /* White background for inputs */
+            --input-text: #1a202c; /* Dark text for inputs in light mode */
+            --input-border: #d1d5db; /* Light border for inputs */
         }
 
         .dark {
             --bg-color: #1e293b; /* Dark slate background */
-            --text-color: #f8fafc; /* Lightest text */
+            --main-text-color: #f8fafc; /* Lightest text in dark mode */
+            --panel-heading-color: #f8fafc; /* Explicitly light for panel headings */
+            --label-color: #cbd5e1; /* Lighter grey for labels in dark mode */
+            --secondary-text-color: #a0aec0; /* Lighter grey for secondary text in dark mode */
             --border-color: #334155; /* Darker border */
             --header-bg-color: #33415e; /* Darker gray for headers */
             --period-time-bg: #475569;
             --period-time-text: #e2e8f0;
             --overlay-bg: rgba(0, 0, 0, 0.7); /* Darker overlay */
             --modal-bg: #334155; /* Dark modal background */
+
+            /* Dark mode variables for panel styling */
+            --panel-bg: #1f2937; /* Darker background for control panels */
+            --panel-item-bg: #374151; /* Even darker for list items/section groups */
+            --input-bg: #334155;
+            --input-text: #f8fafc;
+            --input-border: #4b5563;
         }
 
         body {
             background-color: var(--bg-color);
-            color: var(--text-color);
+            color: var(--main-text-color); /* General body text color */
             font-family: "Inter", sans-serif;
             transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Main page title */
+        .page-title {
+            color: var(--main-text-color);
         }
 
         .calendar-grid {
@@ -169,7 +194,7 @@
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
             max-width: 500px;
             width: 90%;
-            color: var(--text-color);
+            color: var(--main-text-color); /* Modal content text */
         }
 
         /* Color classes for events - using Tailwind's default colors with opacity */
@@ -181,6 +206,59 @@
         .bg-custom-teal { background-color: #2dd4bf; } /* teal-400 */
         .bg-custom-orange { background-color: #fb923c; } /* orange-400 */
         .bg-custom-red-500 { background-color: #ef4444; } /* red-500 */
+
+        /* Panel Specific Styles */
+        .controls-panel {
+            background-color: var(--panel-bg);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .controls-panel h2 {
+            color: var(--panel-heading-color);
+        }
+
+        .controls-panel label {
+            color: var(--label-color);
+        }
+
+        .controls-panel p.text-xs { /* For secondary text like examples in panels */
+            color: var(--secondary-text-color);
+        }
+
+        .controls-panel .list-item { /* For high school and college course list items */
+            background-color: var(--panel-item-bg);
+            border: 1px solid var(--input-border); /* Apply border to items */
+            color: var(--main-text-color); /* Text color for list items */
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+        
+        .controls-panel .list-item span.text-sm { /* For secondary text like section counts */
+            color: var(--secondary-text-color);
+        }
+
+        .controls-panel .section-input-group { /* For college section input groups */
+            background-color: var(--panel-item-bg);
+            border: 1px dashed var(--input-border); /* Dashed border for section group */
+            color: var(--main-text-color); /* Text color for section group */
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        .controls-panel .section-input-group h4,
+        .controls-panel .section-input-group label {
+            color: var(--panel-heading-color); /* Ensure nested titles and labels follow theme */
+        }
+
+        .controls-panel input[type="text"],
+        .controls-panel input[type="number"] {
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            border-color: var(--input-border);
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+        /* Style for text inside alert-like messages */
+        .text-red-500 {
+            color: #ef4444; /* Ensure this remains red */
+        }
 
 
         /* Responsive adjustments */
@@ -203,7 +281,11 @@
             .main-content-area {
                 flex-direction: column;
             }
-            .schedule-panel, .controls-panel {
+            .schedule-panel {
+                width: 100%;
+            }
+            /* Ensure panels stack vertically on small screens */
+            .controls-panel {
                 width: 100%;
                 margin-bottom: 1rem; /* Add some space between panels */
             }
@@ -212,7 +294,7 @@
 </head>
 <body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
     <div class="flex justify-between items-center w-full max-w-7xl mb-6">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">My School Schedule</h1>
+        <h1 id="pageTitle" class="text-3xl md:text-4xl font-bold page-title">My School Schedule</h1>
         <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <svg id="sunIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M2 12h1m15.325-4.475l.707-.707M3.968 19.032l.707-.707m0-11.314l-.707-.707m11.314 0l.707.707"></path></svg>
             <svg id="moonIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -221,27 +303,27 @@
 
     <div class="main-content-area flex flex-col md:flex-row w-full max-w-7xl gap-6">
         <!-- Left Panel for College Courses -->
-        <div class="controls-panel w-full md:w-1/4 bg-gray-100 dark:bg-gray-800 p-6 rounded-xl shadow-xl space-y-6">
+        <div class="controls-panel w-full md:w-1/4 p-6 rounded-xl shadow-xl space-y-6">
             <div>
-                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Add College Course</h2>
+                <h2 class="text-2xl font-bold mb-4">Add College Course</h2>
                 <div class="space-y-4">
                     <div>
-                        <label for="collegeCourseNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Name:</label>
-                        <input type="text" id="collegeCourseNameInput" placeholder="e.g., Calculus II" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <label for="collegeCourseNameInput" class="block text-sm font-medium">Course Name:</label>
+                        <input type="text" id="collegeCourseNameInput" placeholder="e.g., Calculus II" class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     </div>
                     <div>
-                        <label for="numCollegeSectionsInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Number of Sections:</label>
-                        <input type="number" id="numCollegeSectionsInput" min="1" value="1" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <label for="numCollegeSectionsInput" class="block text-sm font-medium">Number of Sections:</label>
+                        <input type="number" id="numCollegeSectionsInput" min="1" value="1" class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         <button id="generateCollegeSectionInputsBtn" class="mt-2 w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500">Generate Section Inputs</button>
                     </div>
-                    <div id="collegeSectionInputsContainer" class="space-y-4 border border-dashed border-gray-300 dark:border-gray-600 p-4 rounded-md">
+                    <div id="collegeSectionInputsContainer" class="space-y-4 border border-dashed rounded-md p-4">
                         <!-- Dynamic section inputs will go here -->
                     </div>
                     <button id="addCollegeCourseBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Add College Course</button>
                 </div>
             </div>
             <div>
-                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">My College Courses</h2>
+                <h2 class="text-2xl font-bold mb-4">My College Courses</h2>
                 <ul id="collegeCoursesList" class="space-y-2">
                     <!-- College courses will be dynamically listed here -->
                 </ul>
@@ -275,17 +357,17 @@
         </div>
 
         <!-- Right Panel for High School Courses -->
-        <div class="controls-panel w-full md:w-1/4 bg-gray-100 dark:bg-gray-800 p-6 rounded-xl shadow-xl space-y-6">
+        <div class="controls-panel w-full md:w-1/4 p-6 rounded-xl shadow-xl space-y-6">
             <div>
-                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Add High School Course</h2>
+                <h2 class="text-2xl font-bold mb-4">Add High School Course</h2>
                 <div class="space-y-4">
                     <div>
-                        <label for="courseNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Name:</label>
-                        <input type="text" id="courseNameInput" placeholder="e.g., Algebra II" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <label for="courseNameInput" class="block text-sm font-medium">Course Name:</label>
+                        <input type="text" id="courseNameInput" placeholder="e.g., Algebra II" class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     </div>
                     <div>
-                        <label for="periodHoursInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Hours Offered (comma-separated):</label>
-                        <input type="text" id="periodHoursInput" placeholder="e.g., 1st Hour, 4th Hour, Advisory" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <label for="periodHoursInput" class="block text-sm font-medium">Hours Offered (comma-separated):</label>
+                        <input type="text" id="periodHoursInput" placeholder="e.g., 1st Hour, 4th Hour, Advisory" class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Examples: "1st Hour", "Advisory", "5th Hour"</p>
                     </div>
                     <button id="addCourseBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Add Course</button>
@@ -293,7 +375,7 @@
             </div>
 
             <div>
-                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">My High School Courses</h2>
+                <h2 class="text-2xl font-bold mb-4">My High School Courses</h2>
                 <ul id="highSchoolCoursesList" class="space-y-2">
                     <!-- High school courses will be dynamically listed here -->
                 </ul>
@@ -753,10 +835,10 @@
             courses.forEach((course, index) => {
                 if (course.type === 'School Class') {
                     const listItem = document.createElement('li');
-                    listItem.className = 'flex justify-between items-center bg-gray-200 dark:bg-gray-700 p-3 rounded-md shadow-sm';
+                    listItem.className = 'flex justify-between items-center p-3 rounded-md shadow-sm list-item';
                     
                     listItem.innerHTML = `
-                        <span class="font-medium text-gray-800 dark:text-gray-100">${course.name}</span>
+                        <span class="font-medium">${course.name}</span>
                         <button data-index="${index}" class="remove-btn bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Remove</button>
                     `;
                     highSchoolCoursesList.appendChild(listItem);
@@ -824,21 +906,21 @@
 
             for (let i = 0; i < numSections; i++) {
                 const sectionDiv = document.createElement('div');
-                sectionDiv.className = 'section-input-group border p-3 rounded-md space-y-2 bg-gray-200 dark:bg-gray-700';
+                sectionDiv.className = 'section-input-group border border-dashed rounded-md p-3 space-y-2';
                 sectionDiv.innerHTML = `
-                    <h4 class="font-semibold text-gray-800 dark:text-gray-100">Section ${i + 1}</h4>
+                    <h4 class="font-semibold">Section ${i + 1}</h4>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Days (comma-separated: Mon, Tue, Wed, Thu, Fri):</label>
-                        <input type="text" class="section-days-input mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" placeholder="e.g., Mon, Wed, Fri">
+                        <label class="block text-sm font-medium">Days (comma-separated: Mon, Tue, Wed, Thu, Fri):</label>
+                        <input type="text" class="section-days-input mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., Mon, Wed, Fri">
                     </div>
                     <div class="flex gap-2">
                         <div class="w-1/2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Time (HH:MM):</label>
-                            <input type="text" class="section-start-time-input mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" placeholder="e.g., 09:00">
+                            <label class="block text-sm font-medium">Start Time (HH:MM):</label>
+                            <input type="text" class="section-start-time-input mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., 09:00">
                         </div>
                         <div class="w-1/2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Time (HH:MM):</label>
-                            <input type="text" class="section-end-time-input mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" placeholder="e.g., 10:15">
+                            <label class="block text-sm font-medium">End Time (HH:MM):</label>
+                            <input type="text" class="section-end-time-input mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., 10:15">
                         </div>
                     </div>
                 `;
@@ -921,12 +1003,12 @@
             courses.forEach((course, index) => {
                 if (course.type === 'College Class') {
                     const listItem = document.createElement('li');
-                    listItem.className = 'flex justify-between items-center bg-gray-200 dark:bg-gray-700 p-3 rounded-md shadow-sm';
+                    listItem.className = 'flex justify-between items-center p-3 rounded-md shadow-sm list-item';
                     
                     // Display only the course name and number of sections
                     const numSections = course.sections.length;
                     listItem.innerHTML = `
-                        <span class="font-medium text-gray-800 dark:text-gray-100">${course.name} <span class="text-sm text-gray-600 dark:text-gray-300">(${numSections} section${numSections === 1 ? '' : 's'})</span></span>
+                        <span class="font-medium">${course.name} <span class="text-sm">(${numSections} section${numSections === 1 ? '' : 's'})</span></span>
                         <button data-index="${index}" class="remove-btn bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Remove</button>
                     `;
                     collegeCoursesList.appendChild(listItem);
