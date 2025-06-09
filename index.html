@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School & College Schedule</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8 rounded-lg bg-white p-4 shadow-xl">Weekly Course Schedule</h1>
+
+    <div class="w-full max-w-7xl bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
+        <!-- Day Headers -->
+        <div class="grid grid-cols-[80px_repeat(5,_1fr)] md:grid-cols-[80px_repeat(5,_1fr)] gap-0 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-purple-700 text-white font-bold rounded-t-xl">
+            <div class="h-12 flex items-center justify-center text-sm border-r border-blue-500">Time</div>
+            <div class="h-12 flex items-center justify-center text-sm">Monday</div>
+            <div class="h-12 flex items-center justify-center text-sm">Tuesday</div>
+            <div class="h-12 flex items-center justify-center text-sm">Wednesday</div>
+            <div class="h-12 flex items-center justify-center text-sm">Thursday</div>
+            <div class="h-12 flex items-center justify-center text-sm">Friday</div>
+        </div>
+
+        <!-- Schedule Grid -->
+        <div id="schedule-grid" class="schedule-grid-container relative">
+            <!-- Time Axis (populated by JS) -->
+            <div id="time-axis" class="relative bg-gray-50 border-r border-gray-200"></div>
+
+            <!-- Day Columns (populated by JS) -->
+            <div id="monday-column" class="day-column"></div>
+            <div id="tuesday-column" class="day-column"></div>
+            <div id="wednesday-column" class="day-column"></div>
+            <div id="thursday-column" class="day-column"></div>
+            <div id="friday-column" class="day-column"></div>
+        </div>
+    </div>
+
+
+
+
+    <script src="script.js"></script>
+</body>
+</html>
