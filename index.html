@@ -252,57 +252,54 @@
         // Data Structures for Classes
         // Re-defining SchoolClass to derive days and times from the periodHour
         class SchoolClass {
-            constructor(name, periodHour, color) {
+            // periodHours is now an array, e.g., ['1st Hour', '4th Hour']
+            constructor(name, periodHours, color) {
                 this.name = name;
-                this.period = periodHour; // e.g., '1st Hour', 'Advisory', '5th Hour'
+                this.periodHours = periodHours; // Array of period strings
                 this.color = color;
                 this.type = 'School Class';
                 this.renderableEvents = []; // This will hold the actual events to be rendered
 
-                // Determine days and times based on periodHour
                 const normalDays = ['Mon', 'Tue', 'Fri'];
-                let blockDay = null;
+                const blockDaysMap = {
+                    '1st Hour': 'Wed', '2nd Hour': 'Wed', '3rd Hour': 'Wed', 'Advisory': 'Wed',
+                    '4th Hour': 'Thu', '5th Hour': 'Thu', '6th Hour': 'Thu', '7th Hour': 'Thu'
+                };
 
-                // Map periodHour to its potential block day, if it exists in the block schedule
-                // This logic ensures that a school class appears on its corresponding block day.
-                // Note: The specific periodHour name (e.g., '1st Hour', 'Advisory') must match the keys in SCHOOL_HOUR_SCHEDULE
-                if (['1st Hour', '2nd Hour', '3rd Hour', 'Advisory'].includes(periodHour)) {
-                    blockDay = 'Wed';
-                } else if (['4th Hour', '5th Hour', '6th Hour', '7th Hour'].includes(periodHour)) {
-                    blockDay = 'Thu';
-                }
+                this.periodHours.forEach(periodHour => {
+                    // Add events for normal days (Mon, Tue, Fri)
+                    normalDays.forEach(day => {
+                        const times = SCHOOL_HOUR_SCHEDULE[day][periodHour];
+                        if (times) {
+                            this.renderableEvents.push({
+                                name: this.name,
+                                day: day,
+                                startTime: times.start,
+                                endTime: times.end,
+                                color: this.color,
+                                type: this.type,
+                                period: periodHour // Store the specific period hour for this event
+                            });
+                        }
+                    });
 
-                // Add events for normal days (Mon, Tue, Fri) based on the detailed schedule
-                normalDays.forEach(day => {
-                    const times = SCHOOL_HOUR_SCHEDULE[day][periodHour];
-                    if (times) {
-                        this.renderableEvents.push({
-                            name: this.name,
-                            day: day,
-                            startTime: times.start,
-                            endTime: times.end,
-                            color: this.color,
-                            type: this.type,
-                            period: this.period // Keep original period name for modal display
-                        });
+                    // Add event for the block day
+                    const blockDay = blockDaysMap[periodHour];
+                    if (blockDay) {
+                        const times = SCHOOL_HOUR_SCHEDULE[blockDay][periodHour];
+                        if (times) {
+                            this.renderableEvents.push({
+                                name: this.name,
+                                day: blockDay,
+                                startTime: times.start,
+                                endTime: times.end,
+                                color: this.color,
+                                type: this.type,
+                                period: periodHour // Store the specific period hour for this event
+                            });
+                        }
                     }
                 });
-
-                // Add event for the block day (Wed or Thu) based on the detailed schedule
-                if (blockDay) {
-                    const times = SCHOOL_HOUR_SCHEDULE[blockDay][periodHour];
-                    if (times) {
-                        this.renderableEvents.push({
-                            name: this.name,
-                            day: blockDay,
-                            startTime: times.start,
-                            endTime: times.end,
-                            color: this.color,
-                            type: this.type,
-                            period: this.period // Keep original period name for modal display
-                        });
-                    }
-                }
             }
         }
 
@@ -367,8 +364,8 @@
 
         // Example Course Objects - Updated for new SchoolClass constructor
         const courses = [
-            // School Classes: Automatically scheduled for 3 normal days + 1 block day based on periodHour
-            new SchoolClass('High School Class', '1st Hour', 'bg-custom-blue'),
+            // School Classes: Now takes an array of period hours
+            new SchoolClass('High School Class', ['1st Hour', '4th Hour', '5th Hour', 'Advisory'], 'bg-custom-blue'),
 
             // College Classes: Still require explicit days and times
             new CollegeClass('College Class', ['Mon', 'Wed'], '09:00', '10:15', 'bg-custom-yellow'),
