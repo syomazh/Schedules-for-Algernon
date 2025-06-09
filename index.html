@@ -246,29 +246,60 @@
             </div>
         </div>
 
-        <!-- Side Panel for Adding/Removing Courses -->
-        <div class="controls-panel w-full md:w-1/4 p-6 bg-gray-100 dark:bg-gray-800 rounded-xl shadow-xl space-y-6">
-            <div>
-                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Add High School Course</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label for="courseNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Name:</label>
-                        <input type="text" id="courseNameInput" placeholder="e.g., Algebra II" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+        <!-- Right-side panels wrapper -->
+        <div class="right-panels-wrapper flex flex-col w-full md:w-1/4 gap-6">
+            <!-- High School Panel (existing) -->
+            <div class="controls-panel bg-gray-100 dark:bg-gray-800 p-6 rounded-xl shadow-xl space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Add High School Course</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="courseNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Name:</label>
+                            <input type="text" id="courseNameInput" placeholder="e.g., Algebra II" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        </div>
+                        <div>
+                            <label for="periodHoursInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Hours Offered (comma-separated):</label>
+                            <input type="text" id="periodHoursInput" placeholder="e.g., 1st Hour, 4th Hour, Advisory" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Examples: "1st Hour", "Advisory", "5th Hour"</p>
+                        </div>
+                        <button id="addCourseBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Add Course</button>
                     </div>
-                    <div>
-                        <label for="periodHoursInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Hours Offered (comma-separated):</label>
-                        <input type="text" id="periodHoursInput" placeholder="e.g., 1st Hour, 4th Hour, Advisory" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Examples: "1st Hour", "Advisory", "5th Hour"</p>
-                    </div>
-                    <button id="addCourseBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Add Course</button>
+                </div>
+
+                <div>
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">My High School Courses</h2>
+                    <ul id="highSchoolCoursesList" class="space-y-2">
+                        <!-- High school courses will be dynamically listed here -->
+                    </ul>
                 </div>
             </div>
 
-            <div>
-                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">My High School Courses</h2>
-                <ul id="highSchoolCoursesList" class="space-y-2">
-                    <!-- High school courses will be dynamically listed here -->
-                </ul>
+            <!-- College Panel (new) -->
+            <div class="controls-panel bg-gray-100 dark:bg-gray-800 p-6 rounded-xl shadow-xl space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Add College Course</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="collegeCourseNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Name:</label>
+                            <input type="text" id="collegeCourseNameInput" placeholder="e.g., Calculus II" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        </div>
+                        <div>
+                            <label for="numCollegeSectionsInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Number of Sections:</label>
+                            <input type="number" id="numCollegeSectionsInput" min="1" value="1" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                            <button id="generateCollegeSectionInputsBtn" class="mt-2 w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500">Generate Section Inputs</button>
+                        </div>
+                        <div id="collegeSectionInputsContainer" class="space-y-4 border border-dashed border-gray-300 dark:border-gray-600 p-4 rounded-md">
+                            <!-- Dynamic section inputs will go here -->
+                        </div>
+                        <button id="addCollegeCourseBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Add College Course</button>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">My College Courses</h2>
+                    <ul id="collegeCoursesList" class="space-y-2">
+                        <!-- College courses will be dynamically listed here -->
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -408,7 +439,6 @@
         // Example Course Objects
         const courses = [
             new SchoolClass('High School Class', ['1st Hour', '4th Hour', '5th Hour', 'Advisory'], 'bg-custom-blue'),
-            // Updated College Class example with multiple sections
             new CollegeClass('College Class', [
                 { days: ['Wed', 'Fri'], startTime: '14:00', endTime: '15:00' },
                 { days: ['Tue', 'Thu'], startTime: '08:00', endTime: '09:00' }
@@ -695,15 +725,15 @@
             }
         });
 
-        // --- New Functionality for Add/Remove Courses ---
+        // --- High School Course Management ---
 
-        const courseNameInput = document.getElementById('courseNameInput');
-        const periodHoursInput = document.getElementById('periodHoursInput');
-        const addCourseBtn = document.getElementById('addCourseBtn');
+        const hsCourseNameInput = document.getElementById('courseNameInput');
+        const hsPeriodHoursInput = document.getElementById('periodHoursInput');
+        const hsAddCourseBtn = document.getElementById('addCourseBtn');
         const highSchoolCoursesList = document.getElementById('highSchoolCoursesList');
 
-        // Utility to parse user input for period hours
-        function parsePeriodHoursInput(inputString) {
+        // Utility to parse user input for period hours for high school classes
+        function parseHighSchoolPeriodHoursInput(inputString) {
             const periodMap = {
                 '1': '1st Hour', '1st': '1st Hour', '1st Hour': '1st Hour',
                 '2': '2nd Hour', '2nd': '2nd Hour', '2nd Hour': '2nd Hour',
@@ -717,19 +747,17 @@
             return inputString.split(',')
                               .map(s => s.trim())
                               .filter(s => s !== '')
-                              .map(s => periodMap[s.toLowerCase()] || s); // Convert to lowercase for map lookup
+                              .map(s => periodMap[s.toLowerCase()] || s);
         }
 
-        // Function to render the list of high school courses in the side panel
         function renderHighSchoolCoursesList() {
-            highSchoolCoursesList.innerHTML = ''; // Clear existing list
+            highSchoolCoursesList.innerHTML = '';
 
             courses.forEach((course, index) => {
                 if (course.type === 'School Class') {
                     const listItem = document.createElement('li');
                     listItem.className = 'flex justify-between items-center bg-gray-200 dark:bg-gray-700 p-3 rounded-md shadow-sm';
                     
-                    // Only display the course name
                     listItem.innerHTML = `
                         <span class="font-medium text-gray-800 dark:text-gray-100">${course.name}</span>
                         <button data-index="${index}" class="remove-btn bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Remove</button>
@@ -738,8 +766,7 @@
                 }
             });
 
-            // Add event listeners to newly created remove buttons
-            document.querySelectorAll('.remove-btn').forEach(button => {
+            document.querySelectorAll('#highSchoolCoursesList .remove-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const indexToRemove = parseInt(event.target.dataset.index);
                     removeCourse(indexToRemove);
@@ -747,49 +774,184 @@
             });
         }
 
-        // Function to add a new high school course
-        addCourseBtn.addEventListener('click', () => {
-            const name = courseNameInput.value.trim();
-            const periodHoursString = periodHoursInput.value.trim();
+        hsAddCourseBtn.addEventListener('click', () => {
+            const name = hsCourseNameInput.value.trim();
+            const periodHoursString = hsPeriodHoursInput.value.trim();
 
             if (!name || !periodHoursString) {
-                alert('Please enter both course name and hours offered.'); // Replace with custom modal later if desired
+                alert('Please enter both course name and hours offered for high school class.');
                 return;
             }
 
-            const periodHours = parsePeriodHoursInput(periodHoursString);
-
-            // Simple validation for period hours (check if at least one valid period is found)
+            const periodHours = parseHighSchoolPeriodHoursInput(periodHoursString);
             const hasValidPeriod = periodHours.some(ph => {
-                // Check if the periodHour exists in any day's schedule
                 return Object.values(SCHOOL_HOUR_SCHEDULE).some(daySchedule => daySchedule[ph]);
             });
 
             if (!hasValidPeriod) {
-                alert('Please enter valid period hours (e.g., "1st Hour", "Advisory", "4th Hour").');
+                alert('Please enter valid period hours (e.g., "1st Hour", "Advisory", "4th Hour") for high school class.');
                 return;
             }
 
-            // Assign a new color by cycling through the available colors
             const newColor = availableColors[colorIndex % availableColors.length];
             colorIndex++;
 
             const newCourse = new SchoolClass(name, periodHours, newColor);
             courses.push(newCourse);
 
-            courseNameInput.value = '';
-            periodHoursInput.value = '';
+            hsCourseNameInput.value = '';
+            hsPeriodHoursInput.value = '';
 
-            // Re-render everything
             renderCourses();
             renderHighSchoolCoursesList();
         });
 
-        // Function to remove a course
+        // --- College Course Management ---
+
+        const collegeCourseNameInput = document.getElementById('collegeCourseNameInput');
+        const numCollegeSectionsInput = document.getElementById('numCollegeSectionsInput');
+        const generateCollegeSectionInputsBtn = document.getElementById('generateCollegeSectionInputsBtn');
+        const collegeSectionInputsContainer = document.getElementById('collegeSectionInputsContainer');
+        const addCollegeCourseBtn = document.getElementById('addCollegeCourseBtn');
+        const collegeCoursesList = document.getElementById('collegeCoursesList');
+
+        // Dynamically generate input fields for college sections
+        function generateCollegeSectionInputs() {
+            collegeSectionInputsContainer.innerHTML = ''; // Clear previous inputs
+            const numSections = parseInt(numCollegeSectionsInput.value);
+
+            if (isNaN(numSections) || numSections <= 0) {
+                collegeSectionInputsContainer.innerHTML = '<p class="text-sm text-red-500">Please enter a valid number of sections (1 or more).</p>';
+                return;
+            }
+
+            for (let i = 0; i < numSections; i++) {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'section-input-group border p-3 rounded-md space-y-2 bg-gray-200 dark:bg-gray-700';
+                sectionDiv.innerHTML = `
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-100">Section ${i + 1}</h4>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Days (comma-separated: Mon, Tue, Wed, Thu, Fri):</label>
+                        <input type="text" class="section-days-input mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" placeholder="e.g., Mon, Wed, Fri">
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Time (HH:MM):</label>
+                            <input type="text" class="section-start-time-input mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" placeholder="e.g., 09:00">
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Time (HH:MM):</label>
+                            <input type="text" class="section-end-time-input mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" placeholder="e.g., 10:15">
+                        </div>
+                    </div>
+                `;
+                collegeSectionInputsContainer.appendChild(sectionDiv);
+            }
+        }
+
+        // Validate time format (HH:MM)
+        function isValidTime(timeStr) {
+            const regex = /^(?:2[0-3]|[01]?[0-9]):(?:[0-5]?[0-9])$/;
+            return regex.test(timeStr);
+        }
+
+        // Add College Course button click handler
+        addCollegeCourseBtn.addEventListener('click', () => {
+            const name = collegeCourseNameInput.value.trim();
+            if (!name) {
+                alert('Please enter a college course name.');
+                return;
+            }
+
+            const sections = [];
+            let isValid = true;
+            const sectionInputGroups = collegeSectionInputsContainer.querySelectorAll('.section-input-group');
+
+            if (sectionInputGroups.length === 0) {
+                 alert('Please generate and fill in at least one section for the college course.');
+                 return;
+            }
+
+            sectionInputGroups.forEach(group => {
+                const daysInput = group.querySelector('.section-days-input').value.trim();
+                const startTimeInput = group.querySelector('.section-start-time-input').value.trim();
+                const endTimeInput = group.querySelector('.section-end-time-input').value.trim();
+
+                const days = daysInput.split(',').map(d => d.trim()).filter(d => DAYS.includes(d));
+
+                if (days.length === 0 || !isValidTime(startTimeInput) || !isValidTime(endTimeInput)) {
+                    alert('Please ensure all section fields are filled correctly and times are in HH:MM format (e.g., 09:00).');
+                    isValid = false;
+                    return;
+                }
+
+                // Additional time validation: end time must be after start time
+                const startMinutes = timeToMinutes(startTimeInput);
+                const endMinutes = timeToMinutes(endTimeInput);
+                if (endMinutes <= startMinutes) {
+                    alert('End time must be after start time for all sections.');
+                    isValid = false;
+                    return;
+                }
+                
+                sections.push({ days, startTime: startTimeInput, endTime: endTimeInput });
+            });
+
+            if (!isValid) return; // Stop if any section input was invalid
+
+            const newColor = availableColors[colorIndex % availableColors.length];
+            colorIndex++;
+
+            const newCourse = new CollegeClass(name, sections, newColor);
+            courses.push(newCourse);
+
+            collegeCourseNameInput.value = '';
+            numCollegeSectionsInput.value = '1'; // Reset to 1 section
+            collegeSectionInputsContainer.innerHTML = ''; // Clear generated sections
+
+            renderCourses();
+            renderHighSchoolCoursesList(); // Re-render HS list in case indices changed
+            renderCollegeCoursesList();
+        });
+
+        // Generate section inputs when number of sections changes
+        generateCollegeSectionInputsBtn.addEventListener('click', generateCollegeSectionInputs);
+
+
+        function renderCollegeCoursesList() {
+            collegeCoursesList.innerHTML = ''; // Clear existing list
+
+            courses.forEach((course, index) => {
+                if (course.type === 'College Class') {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'flex justify-between items-center bg-gray-200 dark:bg-gray-700 p-3 rounded-md shadow-sm';
+                    
+                    const sectionsSummary = course.sections.map(sec => 
+                        `${sec.days.join('/')} ${sec.startTime}-${sec.endTime}`
+                    ).join('; ');
+
+                    listItem.innerHTML = `
+                        <span class="font-medium text-gray-800 dark:text-gray-100">${course.name} <span class="text-sm text-gray-600 dark:text-gray-300">(${sectionsSummary})</span></span>
+                        <button data-index="${index}" class="remove-btn bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Remove</button>
+                    `;
+                    collegeCoursesList.appendChild(listItem);
+                }
+            });
+
+            document.querySelectorAll('#collegeCoursesList .remove-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const indexToRemove = parseInt(event.target.dataset.index);
+                    removeCourse(indexToRemove);
+                });
+            });
+        }
+
+        // Generic remove course function (removes from main courses array and re-renders)
         function removeCourse(index) {
-            courses.splice(index, 1); // Remove the course at the given index
-            renderCourses();          // Re-render the schedule
-            renderHighSchoolCoursesList(); // Re-render the list in the panel
+            courses.splice(index, 1);
+            renderCourses();
+            renderHighSchoolCoursesList(); // Re-render both lists to update indices and content
+            renderCollegeCoursesList();
         }
 
         // Initial rendering and updates
@@ -797,7 +959,9 @@
             renderTimeLabels();
             renderPeriodBlocks();
             renderCourses();
-            renderHighSchoolCoursesList(); // Render the initial list of high school courses
+            renderHighSchoolCoursesList();
+            renderCollegeCoursesList(); // Render college courses list on load
+            generateCollegeSectionInputs(); // Generate initial section inputs
             updateCurrentTimeLine();
             setInterval(updateCurrentTimeLine, 60 * 1000);
         });
