@@ -3,42 +3,720 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School & College Schedule</title>
+    <title>School & College Schedule Planner</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Custom styles for dark mode and soft colors */
+        :root {
+            --bg-color: #f0f4f8; /* Light background */
+            --text-color: #334155; /* Dark slate */
+            --border-color: #e2e8f0; /* Light gray border */
+            --header-bg-color: #cbd5e1; /* Medium gray for headers */
+            --period-time-bg: #e2e8f0;
+            --period-time-text: #475569;
+            --overlay-bg: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay for modal */
+            --modal-bg: #ffffff; /* White modal background */
+        }
+
+        .dark {
+            --bg-color: #1e293b; /* Dark slate background */
+            --text-color: #f8fafc; /* Lightest text */
+            --border-color: #334155; /* Darker border */
+            --header-bg-color: #33415e; /* Darker gray for headers */
+            --period-time-bg: #475569;
+            --period-time-text: #e2e8f0;
+            --overlay-bg: rgba(0, 0, 0, 0.7); /* Darker overlay */
+            --modal-bg: #334155; /* Dark modal background */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: "Inter", sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(5, 1fr); /* Time column + 5 days */
+            grid-template-rows: auto minmax(0, 1fr); /* Header row + content row */
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem; /* rounded-xl */
+            overflow: hidden;
+            background-color: var(--bg-color);
+        }
+
+        .day-header, .time-slot, .period-block, .event-slot, .current-time-line {
+            border-color: var(--border-color);
+        }
+
+        .day-header:first-child {
+            border-right: 1px solid var(--border-color); /* Ensure the corner header has a right border */
+        }
+
+        .day-header {
+            background-color: var(--header-bg-color);
+            color: var(--text-color);
+            font-weight: 600; /* semibold */
+            padding: 0.75rem 0.5rem; /* py-3 px-2 */
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .day-header:last-child {
+            border-right: none;
+        }
+
+        .time-column {
+            grid-column: 1;
+            grid-row: 2;
+            padding-top: 0.5rem;
+            background-color: var(--period-time-bg);
+            color: var(--period-time-text);
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* medium */
+            text-align: right;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .time-label {
+            position: absolute;
+            width: 100%;
+            padding-right: 0.5rem;
+            transform: translateY(-50%); /* Adjust to center vertically on the line */
+        }
+
+
+        .schedule-content {
+            grid-column: 2 / span 5;
+            grid-row: 2;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            position: relative; /* For absolute positioning of events */
+        }
+
+        .day-column {
+            position: relative;
+            border-right: 1px solid var(--border-color);
+            height: 100%; /* Ensure day column takes full height of the schedule content */
+        }
+        .day-column:last-child {
+            border-right: none;
+        }
+
+        .period-block {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: rgba(255, 255, 255, 0.05); /* Very subtle overlay */
+            border-bottom: 1px dashed var(--border-color); /* Soft period divider */
+            padding: 0.25rem;
+            font-size: 0.75rem; /* text-xs */
+            color: var(--text-color);
+            overflow: hidden;
+            z-index: 1; /* Ensure periods are behind events */
+        }
+
+        .event-slot {
+            position: absolute;
+            left: 0;
+            box-sizing: border-box;
+            width: 100%;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* medium */
+            color: white; /* Event text color */
+            overflow: hidden;
+            cursor: pointer;
+            z-index: 10; /* Ensure events are on top */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .current-time-line {
+            position: absolute;
+            left: 80px; /* Offset by time column width */
+            right: 0;
+            height: 2px;
+            background-color: #ef4444; /* red-500 */
+            z-index: 20;
+            pointer-events: none; /* Allow clicks to pass through */
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--overlay-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--modal-bg);
+            padding: 2rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            color: var(--text-color);
+        }
+
+        /* Color classes for events - using Tailwind's default colors with opacity */
+        .bg-custom-blue { background-color: #60a5fa; } /* blue-400 */
+        .bg-custom-green { background-color: #4ade80; } /* green-400 */
+        .bg-custom-purple { background-color: #a78bfa; } /* violet-400 */
+        .bg-custom-yellow { background-color: #fbbf24; } /* amber-400 */
+        .bg-custom-pink { background-color: #f472b6; } /* pink-400 */
+        .bg-custom-teal { background-color: #2dd4bf; } /* teal-400 */
+        .bg-custom-orange { background-color: #fb923c; } /* orange-400 */
+        .bg-custom-red-500 { background-color: #ef4444; } /* red-500 */
+
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .calendar-grid {
+                grid-template-columns: 60px repeat(5, 1fr);
+            }
+            .time-column {
+                font-size: 0.75rem; /* text-xs */
+            }
+            .event-slot {
+                font-size: 0.75rem; /* text-xs */
+                padding: 0.125rem 0.25rem;
+            }
+            .day-header {
+                font-size: 0.875rem; /* text-sm */
+                padding: 0.5rem 0.25rem;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8 rounded-lg bg-white p-4 shadow-xl">Weekly Course Schedule</h1>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+    <div class="flex justify-between items-center w-full max-w-7xl mb-6">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">My School Schedule</h1>
+        <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <svg id="sunIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M2 12h1m15.325-4.475l.707-.707M3.968 19.032l.707-.707m0-11.314l-.707-.707m11.314 0l.707.707"></path></svg>
+            <svg id="moonIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        </button>
+    </div>
 
-    <div class="w-full max-w-7xl bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
-        <!-- Day Headers -->
-        <div class="grid grid-cols-[80px_repeat(5,_1fr)] md:grid-cols-[80px_repeat(5,_1fr)] gap-0 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-purple-700 text-white font-bold rounded-t-xl">
-            <div class="h-12 flex items-center justify-center text-sm border-r border-blue-500">Time</div>
-            <div class="h-12 flex items-center justify-center text-sm">Monday</div>
-            <div class="h-12 flex items-center justify-center text-sm">Tuesday</div>
-            <div class="h-12 flex items-center justify-center text-sm">Wednesday</div>
-            <div class="h-12 flex items-center justify-center text-sm">Thursday</div>
-            <div class="h-12 flex items-center justify-center text-sm">Friday</div>
-        </div>
+    <div id="scheduleContainer" class="w-full max-w-7xl shadow-xl rounded-xl">
+        <div class="calendar-grid min-h-[600px] md:min-h-[700px]">
+            <div class="day-header border-none"></div> <!-- Empty corner -->
+            <div class="day-header">Mon</div>
+            <div class="day-header">Tue</div>
+            <div class="day-header">Wed</div>
+            <div class="day-header">Thu</div>
+            <div class="day-header">Fri</div>
 
-        <!-- Schedule Grid -->
-        <div id="schedule-grid" class="schedule-grid-container relative">
-            <!-- Time Axis (populated by JS) -->
-            <div id="time-axis" class="relative bg-gray-50 border-r border-gray-200"></div>
+            <div class="time-column" id="timeColumn">
+                <!-- Time labels will be dynamically generated here -->
+            </div>
 
-            <!-- Day Columns (populated by JS) -->
-            <div id="monday-column" class="day-column"></div>
-            <div id="tuesday-column" class="day-column"></div>
-            <div id="wednesday-column" class="day-column"></div>
-            <div id="thursday-column" class="day-column"></div>
-            <div id="friday-column" class="day-column"></div>
+            <div class="schedule-content" id="scheduleContent">
+                <div class="day-column" id="monColumn"></div>
+                <div class="day-column" id="tueColumn"></div>
+                <div class="day-column" id="wedColumn"></div>
+                <div class="day-column" id="thuColumn"></div>
+                <div class="day-column" id="friColumn"></div>
+                <!-- Current time line will be appended here -->
+                <div id="currentTimeLine" class="current-time-line hidden"></div>
+            </div>
         </div>
     </div>
 
+    <!-- Modal for event details -->
+    <div id="eventModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="modalTitle" class="text-2xl font-bold mb-4"></h3>
+            <p class="text-lg mb-2"><span class="font-semibold">Type:</span> <span id="modalType"></span></p>
+            <p class="text-lg mb-2"><span class="font-semibold">Day:</span> <span id="modalDays"></span></p>
+            <p class="text-lg mb-2"><span class="font-semibold">Time:</span> <span id="modalTime"></span></p>
+            <p id="modalPeriod" class="text-lg mb-4 hidden"><span class="font-semibold">Period:</span> <span id="modalPeriodText"></span></p>
+            <button id="closeModal" class="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Structures for Classes
+        // Re-defining SchoolClass to derive days and times from the periodHour
+        class SchoolClass {
+            constructor(name, periodHour, color) {
+                this.name = name;
+                this.period = periodHour; // e.g., '1st Hour', 'Advisory', '5th Hour'
+                this.color = color;
+                this.type = 'School Class';
+                this.renderableEvents = []; // This will hold the actual events to be rendered
+
+                // Determine days and times based on periodHour
+                const normalDays = ['Mon', 'Tue', 'Fri'];
+                let blockDay = null;
+
+                // Map periodHour to its potential block day, if it exists in the block schedule
+                // This logic ensures that a school class appears on its corresponding block day.
+                // Note: The specific periodHour name (e.g., '1st Hour', 'Advisory') must match the keys in SCHOOL_HOUR_SCHEDULE
+                if (['1st Hour', '2nd Hour', '3rd Hour', 'Advisory'].includes(periodHour)) {
+                    blockDay = 'Wed';
+                } else if (['4th Hour', '5th Hour', '6th Hour', '7th Hour'].includes(periodHour)) {
+                    blockDay = 'Thu';
+                }
+
+                // Add events for normal days (Mon, Tue, Fri) based on the detailed schedule
+                normalDays.forEach(day => {
+                    const times = SCHOOL_HOUR_SCHEDULE[day][periodHour];
+                    if (times) {
+                        this.renderableEvents.push({
+                            name: this.name,
+                            day: day,
+                            startTime: times.start,
+                            endTime: times.end,
+                            color: this.color,
+                            type: this.type,
+                            period: this.period // Keep original period name for modal display
+                        });
+                    }
+                });
+
+                // Add event for the block day (Wed or Thu) based on the detailed schedule
+                if (blockDay) {
+                    const times = SCHOOL_HOUR_SCHEDULE[blockDay][periodHour];
+                    if (times) {
+                        this.renderableEvents.push({
+                            name: this.name,
+                            day: blockDay,
+                            startTime: times.start,
+                            endTime: times.end,
+                            color: this.color,
+                            type: this.type,
+                            period: this.period // Keep original period name for modal display
+                        });
+                    }
+                }
+            }
+        }
+
+        class CollegeClass {
+            constructor(name, days, startTime, endTime, color) {
+                this.name = name;
+                this.days = days; // Array of 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'
+                this.startTime = startTime; // "HH:MM"
+                this.endTime = endTime;     // "HH:MM"
+                this.color = color;
+                this.type = 'College Class';
+            }
+        }
+
+        // Detailed school hour schedule mapping for each individual period hour on each day type.
+        // This allows school classes to automatically find their correct time slots across normal and block days.
+        const SCHOOL_HOUR_SCHEDULE = {
+            'Mon': {
+                '1st Hour': { start: '07:40', end: '08:32' },
+                '2nd Hour': { start: '08:37', end: '09:29' },
+                '3rd Hour': { start: '09:34', end: '10:26' },
+                '4th Hour': { start: '10:31', end: '11:23' },
+                // 5th Period & Lunch: representing the full block span
+                '5th Hour': { start: '11:23', end: '12:56' },
+                '6th Hour': { start: '13:01', end: '13:53' },
+                '7th Hour': { start: '13:58', end: '14:50' },
+            },
+            'Tue': { // Same schedule as Monday
+                '1st Hour': { start: '07:40', end: '08:32' },
+                '2nd Hour': { start: '08:37', end: '09:29' },
+                '3rd Hour': { start: '09:34', end: '10:26' },
+                '4th Hour': { start: '10:31', end: '11:23' },
+                '5th Hour': { start: '11:23', end: '12:56' },
+                '6th Hour': { start: '13:01', end: '13:53' },
+                '7th Hour': { start: '13:58', end: '14:50' },
+            },
+            'Wed': { // Blue Day Block Schedule
+                '1st Hour': { start: '07:40', end: '09:13' }, // Mapped to 1st Block
+                'Advisory': { start: '09:20', end: '10:53' }, // Mapped to Advisory Block
+                // 2nd Block & Lunch: representing the full block span
+                '2nd Hour': { start: '10:53', end: '13:10' }, // Mapped to 2nd Block
+                '3rd Hour': { start: '13:17', end: '14:50' }, // Mapped to 3rd Block
+            },
+            'Thu': { // Red Day Block Schedule
+                '4th Hour': { start: '07:40', end: '09:13' }, // Mapped to 4th Block
+                '5th Hour': { start: '09:20', end: '10:53' }, // Mapped to 5th Block
+                // 6th Block & Lunch: representing the full block span
+                '6th Hour': { start: '10:53', end: '13:10' }, // Mapped to 6th Block
+                '7th Hour': { start: '13:17', end: '14:50' }, // Mapped to 7th Block
+            },
+            'Fri': { // Same schedule as Monday
+                '1st Hour': { start: '07:40', end: '08:32' },
+                '2nd Hour': { start: '08:37', end: '09:29' },
+                '3rd Hour': { start: '09:34', end: '10:26' },
+                '4th Hour': { start: '10:31', end: '11:23' },
+                '5th Hour': { start: '11:23', end: '12:56' },
+                '6th Hour': { start: '13:01', end: '13:53' },
+                '7th Hour': { start: '13:58', end: '14:50' },
+            }
+        };
 
 
+        // Example Course Objects - Updated for new SchoolClass constructor
+        const courses = [
+            // School Classes: Automatically scheduled for 3 normal days + 1 block day based on periodHour
+            new SchoolClass('High School Class', '1st Hour', 'bg-custom-blue'),
 
-    <script src="script.js"></script>
+            // College Classes: Still require explicit days and times
+            new CollegeClass('College Class', ['Mon', 'Wed'], '09:00', '10:15', 'bg-custom-yellow'),
+        ];
+
+        // Schedule Configuration - Defines the overall grid time range and days
+        const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        const START_HOUR = 7; // 7 AM
+        const END_HOUR = 15; // 3 PM (ends 2:50 PM, so 3 PM is safe boundary for grid height)
+        const TOTAL_MINUTES_SPAN = (END_HOUR - START_HOUR) * 60; // Total minutes covered by the schedule grid (8 hours * 60 minutes = 480 minutes)
+
+        // School Period Definitions (for background blocks, these are overall blocks)
+        // These define the visual sections of the school day.
+        const schoolPeriods = {
+            'Mon': [
+                { name: '1st Period', start: '07:40', end: '08:32', label: '' },
+                { name: '2nd Period', start: '08:37', end: '09:29', label: '' },
+                { name: '3rd Period', start: '09:34', end: '10:26', label: '' },
+                { name: '4th Period', start: '10:31', end: '11:23', label: '' },
+                { name: '5th Period & Lunch', start: '11:23', end: '12:56', label: '' },
+                { name: '6th Period', start: '13:01', end: '13:53', label: '' },
+                { name: '7th Period', start: '13:58', end: '14:50', label: '' },
+            ],
+            'Tue': [
+                { name: '1st Period', start: '07:40', end: '08:32', label: '' },
+                { name: '2nd Period', start: '08:37', end: '09:29', label: '' },
+                { name: '3rd Period', start: '09:34', end: '10:26', label: '' },
+                { name: '4th Period', start: '10:31', end: '11:23', label: '' },
+                { name: '5th Period & Lunch', start: '11:23', end: '12:56', label: '' },
+                { name: '6th Period', start: '13:01', end: '13:53', label: '' },
+                { name: '7th Period', start: '13:58', end: '14:50', label: '' },
+            ],
+            'Wed': [ // Blue Day - Block schedule periods
+                { name: '1st Block', start: '07:40', end: '09:13', label: '' },
+                { name: 'Advisory Block', start: '09:20', end: '10:53', label: 'Advisory' },
+                { name: '2nd Block & Lunch', start: '10:53', end: '13:10', label: '' },
+                { name: '3rd Block', start: '13:17', end: '14:50', label: '' },
+            ],
+            'Thu': [ // Red Day - Block schedule periods
+                { name: '4th Block', start: '07:40', end: '09:13', label: '' },
+                { name: '5th Block', start: '09:20', end: '10:53', label: '' },
+                { name: '6th Block & Lunch', start: '10:53', end: '13:10', label: '' },
+                { name: '7th Block', start: '13:17', end: '14:50', label: '' },
+            ],
+            'Fri': [
+                { name: '1st Period', start: '07:40', end: '08:32', label: '' },
+                { name: '2nd Period', start: '08:37', end: '09:29', label: '' },
+                { name: '3rd Period', start: '09:34', end: '10:26', label: '' },
+                { name: '4th Period', start: '10:31', end: '11:23', label: '' },
+                { name: '5th Period & Lunch', start: '11:23', end: '12:56', label: '' },
+                { name: '6th Period', start: '13:01', end: '13:53', label: '' },
+                { name: '7th Period', start: '13:58', end: '14:50', label: '' },
+            ]
+        };
+
+        // Utility function to convert "HH:MM" time string to minutes from START_HOUR
+        function timeToMinutes(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return (hours - START_HOUR) * 60 + minutes;
+        }
+
+        // Utility function to format minutes back to "HH:MM AM/PM" string
+        function formatMinutesToTime(minutes) {
+            const totalMinutes = START_HOUR * 60 + minutes;
+            const hours = Math.floor(totalMinutes / 60);
+            const mins = totalMinutes % 60;
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 === 0 ? 12 : hours % 12;
+            return `${displayHours}:${mins.toString().padStart(2, '0')} ${ampm}`;
+        }
+
+        // Function to create and append background period blocks in the schedule grid
+        function renderPeriodBlocks() {
+            DAYS.forEach(day => {
+                const dayColumn = document.getElementById(`${day.toLowerCase()}Column`);
+                schoolPeriods[day].forEach(period => {
+                    const startMinutes = timeToMinutes(period.start);
+                    const endMinutes = timeToMinutes(period.end);
+                    const durationMinutes = endMinutes - startMinutes;
+
+                    const topPercentage = (startMinutes / TOTAL_MINUTES_SPAN) * 100;
+                    const heightPercentage = (durationMinutes / TOTAL_MINUTES_SPAN) * 100;
+
+                    const periodBlock = document.createElement('div');
+                    periodBlock.className = 'period-block';
+                    periodBlock.style.top = `${topPercentage}%`;
+                    periodBlock.style.height = `${heightPercentage}%`;
+                    periodBlock.innerHTML = `<div class="p-1">${period.label}</div>`; // Label for the period block
+                    dayColumn.appendChild(periodBlock);
+                });
+            });
+        }
+
+        // Function to render time labels in the leftmost time column
+        function renderTimeLabels() {
+            const timeColumn = document.getElementById('timeColumn');
+            const intervalMinutes = 60; // Display a time label every hour
+            for (let i = 0; i <= TOTAL_MINUTES_SPAN; i += intervalMinutes) {
+                const labelTime = formatMinutesToTime(i);
+                const timeLabelDiv = document.createElement('div');
+                timeLabelDiv.className = 'time-label';
+                timeLabelDiv.style.top = `${(i / TOTAL_MINUTES_SPAN) * 100}%`;
+                timeLabelDiv.textContent = labelTime;
+                timeColumn.appendChild(timeLabelDiv);
+            }
+        }
+
+        // Function to render courses on the schedule grid
+        function renderCourses() {
+            const dayColumns = {};
+            DAYS.forEach(day => {
+                dayColumns[day] = document.getElementById(`${day.toLowerCase()}Column`);
+            });
+
+            // Collect all individual events to be rendered, flattening SchoolClass.renderableEvents
+            const allRenderableEvents = [];
+            courses.forEach(course => {
+                if (course.type === 'School Class') {
+                    // For School Classes, use the pre-generated renderableEvents
+                    allRenderableEvents.push(...course.renderableEvents);
+                } else { // For College Classes, create renderable event objects directly
+                    course.days.forEach(day => {
+                        allRenderableEvents.push({
+                            name: course.name,
+                            day: day,
+                            startTime: course.startTime,
+                            endTime: course.endTime,
+                            color: course.color,
+                            type: course.type,
+                            period: null // College classes don't have school periods
+                        });
+                    });
+                }
+            });
+
+            // Now, iterate through all collected events and dynamically create their HTML elements
+            allRenderableEvents.forEach(eventToRender => {
+                const dayColumn = dayColumns[eventToRender.day];
+                if (!dayColumn) return; // Skip if day column not found
+
+                const startMinutes = timeToMinutes(eventToRender.startTime);
+                const endMinutes = timeToMinutes(eventToRender.endTime);
+                const durationMinutes = endMinutes - startMinutes;
+
+                const topPercentage = (startMinutes / TOTAL_MINUTES_SPAN) * 100;
+                const heightPercentage = (durationMinutes / TOTAL_MINUTES_SPAN) * 100;
+
+                const eventSlot = document.createElement('div');
+                eventSlot.className = `event-slot ${eventToRender.color} text-white truncate`; // Added truncate for long names
+                eventSlot.style.top = `${topPercentage}%`;
+                eventSlot.style.height = `${heightPercentage}%`;
+                eventSlot.innerHTML = `
+                    <p class="font-semibold text-white">${eventToRender.name}</p>
+                    <p class="text-xs text-gray-100">${eventToRender.startTime} - ${eventToRender.endTime}</p>
+                `;
+                // Add click listener to show modal with detailed event information
+                eventSlot.addEventListener('click', () => showEventModal(eventToRender));
+                dayColumn.appendChild(eventSlot);
+            });
+
+            // Adjust positions for overlapping events within each day column to prevent full occlusion
+            DAYS.forEach(day => {
+                const dayColumn = dayColumns[day];
+                const events = Array.from(dayColumn.querySelectorAll('.event-slot'));
+
+                // Sort events by their start time (top position) to process overlaps correctly
+                events.sort((a, b) => parseFloat(a.style.top) - parseFloat(b.style.top));
+
+                const occupiedSlots = []; // Stores { start: percent, end: percent, element: eventSlot, lane: number }
+
+                events.forEach(eventSlot => {
+                    const eventTop = parseFloat(eventSlot.style.top);
+                    const eventHeight = parseFloat(eventSlot.style.height);
+                    const eventBottom = eventTop + eventHeight;
+
+                    let laneFound = false;
+                    // Iterate through potential lanes (up to 5 to avoid excessive shrinking)
+                    for (let lane = 0; lane < 5; lane++) {
+                        let canFitInLane = true;
+                        // Check if the current event overlaps with any event already placed in this lane
+                        for (const slot of occupiedSlots) {
+                            if (slot.lane === lane && eventTop < slot.end && eventBottom > slot.start) {
+                                canFitInLane = false;
+                                break;
+                            }
+                        }
+                        if (canFitInLane) {
+                            // If no overlap in this lane, assign the event to it
+                            occupiedSlots.push({ start: eventTop, end: eventBottom, element: eventSlot, lane: lane });
+                            eventSlot.dataset.lane = lane; // Store the assigned lane in a dataset attribute
+                            laneFound = true;
+                            break;
+                        }
+                    }
+                    if (!laneFound) {
+                        // Fallback: If no free lane is found after trying several, just stack it in lane 0.
+                        // This scenario indicates many simultaneous overlaps.
+                        console.warn(`Could not find an empty lane for event: ${eventSlot.textContent}. Stacking in lane 0.`);
+                        eventSlot.dataset.lane = 0;
+                        occupiedSlots.push({ start: eventTop, end: eventBottom, element: eventSlot, lane: 0 });
+                    }
+                });
+
+                // After all events are assigned a lane, make a second pass to update their width and left position.
+                // This is crucial because the total number of lanes (maxLanes) might increase as more events are processed.
+                const maxLanes = Math.max(0, ...occupiedSlots.map(s => s.lane)) + 1; // Determine the total number of lanes used
+                for (const slot of occupiedSlots) {
+                    const eventLane = parseInt(slot.element.dataset.lane);
+                    slot.element.style.width = `${100 / maxLanes}%`; // Divide width among all active lanes
+                    slot.element.style.left = `${(eventLane / maxLanes) * 100}%`; // Position based on lane
+                }
+            });
+        }
+
+        // Function to update the current time line (no changes needed)
+        function updateCurrentTimeLine() {
+            const currentTimeLine = document.getElementById('currentTimeLine');
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+
+            // Only show the line if the current time falls within the schedule's defined hours
+            if (currentHour >= START_HOUR && currentHour < END_HOUR) {
+                const minutesFromStart = (currentHour - START_HOUR) * 60 + currentMinute;
+                const topPercentage = (minutesFromStart / TOTAL_MINUTES_SPAN) * 100;
+                currentTimeLine.style.top = `${topPercentage}%`;
+                currentTimeLine.classList.remove('hidden'); // Show the line
+
+                // Determine which day column the line should span (if today is a scheduled day)
+                const today = new Date().toLocaleString('en-US', { weekday: 'short' });
+                const dayIndex = DAYS.indexOf(today);
+
+                if (dayIndex !== -1) {
+                    // Set grid column for the line to span across the correct day column
+                    // (+2 because of the time column (index 1) and grid-column starting from 1)
+                    currentTimeLine.style.gridColumn = `${dayIndex + 2} / span 1`;
+                } else {
+                    currentTimeLine.classList.add('hidden'); // Hide if today is not a scheduled day
+                }
+
+            } else {
+                currentTimeLine.classList.add('hidden'); // Hide if outside schedule hours
+            }
+        }
+
+
+        // Modal functions for displaying event details
+        const eventModal = document.getElementById('eventModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalType = document.getElementById('modalType');
+        const modalDays = document.getElementById('modalDays'); // Now displays a single day for individual events
+        const modalTime = document.getElementById('modalTime');
+        const modalPeriod = document.getElementById('modalPeriod');
+        const modalPeriodText = document.getElementById('modalPeriodText');
+        const closeModalBtn = document.getElementById('closeModal');
+
+        // Function to show the event details modal
+        // It now expects an 'eventDetails' object (which is a single renderable event)
+        function showEventModal(eventDetails) {
+            modalTitle.textContent = eventDetails.name;
+            modalType.textContent = eventDetails.type;
+            modalDays.textContent = eventDetails.day; // Displays the specific day of the event
+            modalTime.textContent = `${eventDetails.startTime} - ${eventDetails.endTime}`;
+
+            // Show period information only for School Classes that have a period defined
+            if (eventDetails.type === 'School Class' && eventDetails.period) {
+                modalPeriod.classList.remove('hidden');
+                modalPeriodText.textContent = eventDetails.period;
+            } else {
+                modalPeriod.classList.add('hidden'); // Hide if not a school class or no period
+            }
+
+            eventModal.classList.remove('hidden'); // Display the modal
+        }
+
+        // Event listener to close the modal when the close button is clicked
+        closeModalBtn.addEventListener('click', () => {
+            eventModal.classList.add('hidden');
+        });
+
+        // Event listener to close the modal when clicking outside the modal content
+        eventModal.addEventListener('click', (e) => {
+            if (e.target === eventModal) {
+                eventModal.classList.add('hidden');
+            }
+        });
+
+        // Dark Mode Toggle functionality
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        // Function to apply the chosen theme (light or dark)
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        }
+
+        // Check for saved theme preference in local storage or system preference on load
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            applyTheme('dark');
+        } else {
+            applyTheme('light');
+        }
+
+        // Event listener for the dark mode toggle button
+        darkModeToggle.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                applyTheme('light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                applyTheme('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+
+        // Initial rendering of the schedule and continuous updates
+        window.addEventListener('load', () => {
+            renderTimeLabels();      // Render time labels on the left
+            renderPeriodBlocks();    // Render background period divisions
+            renderCourses();         // Render all school and college courses
+            updateCurrentTimeLine(); // Initial positioning of the current time line
+            setInterval(updateCurrentTimeLine, 60 * 1000); // Update the time line every minute
+        });
+
+        // Re-render the schedule elements on window resize to ensure responsiveness
+        window.addEventListener('resize', () => {
+            // Clear existing elements before re-rendering to avoid duplicates or incorrect positioning
+            DAYS.forEach(day => {
+                const dayColumn = document.getElementById(`${day.toLowerCase()}Column`);
+                dayColumn.innerHTML = ''; // Clear contents of each day column
+            });
+            renderPeriodBlocks();
+            renderCourses();
+            updateCurrentTimeLine();
+        });
+
+    </script>
 </body>
 </html>
