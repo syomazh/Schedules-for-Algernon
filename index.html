@@ -220,8 +220,36 @@
     </div>
 
     <div class="main-content-area flex flex-col md:flex-row w-full max-w-7xl gap-6">
+        <!-- Left Panel for College Courses -->
+        <div class="controls-panel w-full md:w-1/4 bg-gray-100 dark:bg-gray-800 p-6 rounded-xl shadow-xl space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Add College Course</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="collegeCourseNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Name:</label>
+                        <input type="text" id="collegeCourseNameInput" placeholder="e.g., Calculus II" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    </div>
+                    <div>
+                        <label for="numCollegeSectionsInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Number of Sections:</label>
+                        <input type="number" id="numCollegeSectionsInput" min="1" value="1" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <button id="generateCollegeSectionInputsBtn" class="mt-2 w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500">Generate Section Inputs</button>
+                    </div>
+                    <div id="collegeSectionInputsContainer" class="space-y-4 border border-dashed border-gray-300 dark:border-gray-600 p-4 rounded-md">
+                        <!-- Dynamic section inputs will go here -->
+                    </div>
+                    <button id="addCollegeCourseBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Add College Course</button>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">My College Courses</h2>
+                <ul id="collegeCoursesList" class="space-y-2">
+                    <!-- College courses will be dynamically listed here -->
+                </ul>
+            </div>
+        </div>
+
         <!-- Main Schedule Container -->
-        <div id="scheduleContainer" class="schedule-panel w-full md:w-3/4 shadow-xl rounded-xl">
+        <div id="scheduleContainer" class="schedule-panel w-full md:w-1/2 shadow-xl rounded-xl">
             <div class="calendar-grid min-h-[600px] md:min-h-[700px]">
                 <div class="day-header border-none"></div> <!-- Empty corner -->
                 <div class="day-header">Mon</div>
@@ -246,60 +274,29 @@
             </div>
         </div>
 
-        <!-- Right-side panels wrapper -->
-        <div class="right-panels-wrapper flex flex-col w-full md:w-1/4 gap-6">
-            <!-- High School Panel (existing) -->
-            <div class="controls-panel bg-gray-100 dark:bg-gray-800 p-6 rounded-xl shadow-xl space-y-6">
-                <div>
-                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Add High School Course</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="courseNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Name:</label>
-                            <input type="text" id="courseNameInput" placeholder="e.g., Algebra II" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                        </div>
-                        <div>
-                            <label for="periodHoursInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Hours Offered (comma-separated):</label>
-                            <input type="text" id="periodHoursInput" placeholder="e.g., 1st Hour, 4th Hour, Advisory" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Examples: "1st Hour", "Advisory", "5th Hour"</p>
-                        </div>
-                        <button id="addCourseBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Add Course</button>
+        <!-- Right Panel for High School Courses -->
+        <div class="controls-panel w-full md:w-1/4 bg-gray-100 dark:bg-gray-800 p-6 rounded-xl shadow-xl space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Add High School Course</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="courseNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Name:</label>
+                        <input type="text" id="courseNameInput" placeholder="e.g., Algebra II" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                     </div>
-                </div>
-
-                <div>
-                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">My High School Courses</h2>
-                    <ul id="highSchoolCoursesList" class="space-y-2">
-                        <!-- High school courses will be dynamically listed here -->
-                    </ul>
+                    <div>
+                        <label for="periodHoursInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Hours Offered (comma-separated):</label>
+                        <input type="text" id="periodHoursInput" placeholder="e.g., 1st Hour, 4th Hour, Advisory" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Examples: "1st Hour", "Advisory", "5th Hour"</p>
+                    </div>
+                    <button id="addCourseBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Add Course</button>
                 </div>
             </div>
 
-            <!-- College Panel (new) -->
-            <div class="controls-panel bg-gray-100 dark:bg-gray-800 p-6 rounded-xl shadow-xl space-y-6">
-                <div>
-                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Add College Course</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="collegeCourseNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Name:</label>
-                            <input type="text" id="collegeCourseNameInput" placeholder="e.g., Calculus II" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                        </div>
-                        <div>
-                            <label for="numCollegeSectionsInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Number of Sections:</label>
-                            <input type="number" id="numCollegeSectionsInput" min="1" value="1" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                            <button id="generateCollegeSectionInputsBtn" class="mt-2 w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500">Generate Section Inputs</button>
-                        </div>
-                        <div id="collegeSectionInputsContainer" class="space-y-4 border border-dashed border-gray-300 dark:border-gray-600 p-4 rounded-md">
-                            <!-- Dynamic section inputs will go here -->
-                        </div>
-                        <button id="addCollegeCourseBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Add College Course</button>
-                    </div>
-                </div>
-                <div>
-                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">My College Courses</h2>
-                    <ul id="collegeCoursesList" class="space-y-2">
-                        <!-- College courses will be dynamically listed here -->
-                    </ul>
-                </div>
+            <div>
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">My High School Courses</h2>
+                <ul id="highSchoolCoursesList" class="space-y-2">
+                    <!-- High school courses will be dynamically listed here -->
+                </ul>
             </div>
         </div>
     </div>
