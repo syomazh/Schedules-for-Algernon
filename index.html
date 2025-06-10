@@ -375,7 +375,7 @@
     </head>
     <body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
         <div class="flex justify-between items-center w-full max-w-7xl mb-6">
-            <h1 id="pageTitle" class="text-3xl md:text-4xl font-bold page-title">Schedules for Algernon 🖱</h1>
+            <h1 id="pageTitle" class="text-3xl md:text-4xl font-bold page-title">Schedules for Algernon</h1>
             <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <svg id="sunIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M2 12h1m15.325-4.475l.707-.707M3.968 19.032l.707-.707m0-11.314l-.707-.707m11.314 0l.707.707"></path></svg>
                 <svg id="moonIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -474,6 +474,15 @@
                             <!-- High school courses will be dynamically listed here -->
                         </ul>
                     </div>
+
+                    <!-- Save/Load Section -->
+                    <div class="space-y-4 pt-6 border-t border-dashed border-gray-300 dark:border-gray-600">
+                        <h2 class="text-2xl font-bold">Manage Schedule</h2>
+                        <button id="saveScheduleBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Save Schedule</button>
+                        <input type="file" id="loadFileInput" class="hidden" accept=".txt,application/json">
+                        <button id="loadScheduleBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Load Schedule</button>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -514,7 +523,8 @@
                                     endTime: times.end,
                                     color: this.color,
                                     type: this.type,
-                                    period: periodHour
+                                    period: periodHour,
+                                    isGreyedOut: false // Default to not greyed out
                                 });
                             }
                         });
@@ -531,7 +541,8 @@
                                 endTime: times.end,
                                 color: this.color,
                                 type: this.type,
-                                period: periodHour
+                                period: periodHour,
+                                isGreyedOut: false // Default to not greyed out
                             });
                         }
                         if (SCHOOL_HOUR_SCHEDULE['Thu'][periodHour]) {
@@ -543,7 +554,8 @@
                                 endTime: times.end,
                                 color: this.color,
                                 type: this.type,
-                                period: periodHour
+                                period: periodHour,
+                                isGreyedOut: false // Default to not greyed out
                             });
                         }
                     });
@@ -568,7 +580,8 @@
                                 endTime: section.endTime,
                                 color: this.color,
                                 type: this.type,
-                                period: null // College classes don't have school periods
+                                period: null, // College classes don't have school periods
+                                isGreyedOut: false // Default to not greyed out
                             });
                         });
                     });
@@ -618,7 +631,6 @@
             };
 
             // Pre-process SCHOOL_HOUR_SCHEDULE for easier period block rendering
-            // Moved this declaration before its usage in renderPeriodBlocks
             const schoolPeriods = {
                 'Mon': [], 'Tue': [], 'Wed': [], 'Thu': [], 'Fri': []
             };
@@ -736,21 +748,18 @@
             /**
              * Toggles the color of an event element between its original color and a greyed-out state.
              * @param {HTMLElement} eventElement - The event slot DOM element to toggle.
+             * @param {object} eventData - The corresponding event data object from the courses array.
              */
-            function toggleEventColor(eventElement) {
-                const originalColor = eventElement.dataset.originalColor;
-                let isGreyedOut = eventElement.dataset.isGreyedOut === 'true';
+            function toggleEventColor(eventElement, eventData) {
+                const originalColor = eventData.color; // Use original color from eventData
+                eventData.isGreyedOut = !eventData.isGreyedOut; // Toggle the state in the data
 
-                if (isGreyedOut) {
-                    // It's currently greyed out, revert to original color
-                    eventElement.classList.remove('greyed-out');
-                    eventElement.classList.add(originalColor);
-                    eventElement.dataset.isGreyedOut = 'false';
-                } else {
-                    // It's currently colorful, grey it out
+                if (eventData.isGreyedOut) {
                     eventElement.classList.remove(originalColor);
                     eventElement.classList.add('greyed-out');
-                    eventElement.dataset.isGreyedOut = 'true';
+                } else {
+                    eventElement.classList.remove('greyed-out');
+                    eventElement.classList.add(originalColor);
                 }
             }
 
@@ -789,11 +798,11 @@
                     const heightPercentage = (durationMinutes / TOTAL_MINUTES_SPAN) * 100;
 
                     const eventSlot = document.createElement('div');
-                    eventSlot.className = `event-slot ${eventData.color} flex flex-col items-center justify-center text-center p-1`;
+                    // Apply original color or greyed-out class based on eventData.isGreyedOut
+                    eventSlot.className = `event-slot ${eventData.isGreyedOut ? 'greyed-out' : eventData.color} flex flex-col items-center justify-center text-center p-1`;
                     
-                    // Store original color and initial greyed-out state
+                    // Store original color for toggling back
                     eventSlot.dataset.originalColor = eventData.color;
-                    eventSlot.dataset.isGreyedOut = 'false'; // Initialize as not greyed out
 
                     eventSlot.style.top = `${topPercentage}%`;
                     eventSlot.style.height = `${heightPercentage}%`;
@@ -817,12 +826,12 @@
                     eventSlot.dataset.startTime = eventData.startTime;
                     eventSlot.dataset.endTime = eventData.endTime;
                     eventSlot.dataset.period = eventData.period || ''; // Use empty string if no period
+                    // No need to store isGreyedOut in dataset as it's directly updated in eventData object
 
-                    // Attach click listener for toggling color
+                    // Attach click listener for toggling color, passing both element and data
                     eventSlot.addEventListener('click', (e) => {
                         e.stopPropagation(); // Prevent clicks on parent elements if any
-                        toggleEventColor(eventSlot);
-                        // showEventModal(eventSlot.dataset); // Removed direct modal call as per request focus
+                        toggleEventColor(eventSlot, eventData);
                     });
                     
                     // Store the DOM element reference on the eventData object
@@ -1311,7 +1320,77 @@
                 renderCollegeCoursesList();
             }
 
-        
+            // --- Save and Load Functionality ---
+            const saveScheduleBtn = document.getElementById('saveScheduleBtn');
+            const loadScheduleBtn = document.getElementById('loadScheduleBtn');
+            const loadFileInput = document.getElementById('loadFileInput');
+
+            saveScheduleBtn.addEventListener('click', () => {
+                const scheduleData = JSON.stringify(courses, null, 2); // Pretty print JSON
+                const blob = new Blob([scheduleData], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'algernon_schedule.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            loadScheduleBtn.addEventListener('click', () => {
+                loadFileInput.click(); // Trigger the hidden file input click
+            });
+
+            loadFileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) {
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const loadedData = JSON.parse(e.target.result);
+                        if (Array.isArray(loadedData)) {
+                            // Clear existing courses
+                            courses.length = 0; 
+                            // Re-populate courses array with loaded data
+                            loadedData.forEach(loadedCourse => {
+                                // Ensure loaded data conforms to class structure
+                                if (loadedCourse.type === 'High School Class') {
+                                    const newHsCourse = new SchoolClass(loadedCourse.name, loadedCourse.periodHours, loadedCourse.color);
+                                    newHsCourse.renderableEvents = loadedCourse.renderableEvents.map(event => ({
+                                        ...event,
+                                        isGreyedOut: event.isGreyedOut || false // Ensure isGreyedOut is present
+                                    }));
+                                    courses.push(newHsCourse);
+                                } else if (loadedCourse.type === 'College Class') {
+                                    const newCollegeCourse = new CollegeClass(loadedCourse.name, loadedCourse.sections, loadedCourse.color);
+                                     newCollegeCourse.renderableEvents = loadedCourse.renderableEvents.map(event => ({
+                                        ...event,
+                                        isGreyedOut: event.isGreyedOut || false // Ensure isGreyedOut is present
+                                    }));
+                                    courses.push(newCollegeCourse);
+                                }
+                            });
+                            
+                            // Re-render everything
+                            renderCourses();
+                            renderHighSchoolCoursesList();
+                            renderCollegeCoursesList();
+                            alert('Schedule loaded successfully!');
+                        } else {
+                            alert('Invalid file format. Please select a valid schedule file.');
+                        }
+                    } catch (error) {
+                        console.error('Error parsing schedule file:', error);
+                        alert('Error loading schedule. Please ensure the file is a valid JSON format.');
+                    }
+                };
+                reader.readAsText(file);
+            });
+
 
             // Initial rendering and updates
             window.addEventListener('load', () => {
