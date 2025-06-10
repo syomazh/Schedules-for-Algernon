@@ -206,6 +206,15 @@
             .bg-custom-orange { background-color: #fb923c; } /* orange-400 */
             .bg-custom-red-500 { background-color: #ef4444; } /* red-500 */
 
+            /* New CSS for greyed-out state */
+            .event-slot.greyed-out {
+                background-color: #9ca3af; /* Tailwind gray-400 */
+                opacity: 0.5; /* Make it visually distinct */
+            }
+            .dark .event-slot.greyed-out {
+                background-color: #4b5563; /* Tailwind gray-600 */
+            }
+
             /* Panel Specific Styles */
             .controls-panel {
                 background-color: var(--panel-bg);
@@ -366,7 +375,7 @@
     </head>
     <body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
         <div class="flex justify-between items-center w-full max-w-7xl mb-6">
-            <h1 id="pageTitle" class="text-3xl md:text-4xl font-bold page-title">Schedules for Algernon</h1>
+            <h1 id="pageTitle" class="text-3xl md:text-4xl font-bold page-title">Schedules for Algernon 🖱</h1>
             <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <svg id="sunIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M2 12h1m15.325-4.475l.707-.707M3.968 19.032l.707-.707m0-11.314l-.707-.707m11.314 0l.707.707"></path></svg>
                 <svg id="moonIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -690,7 +699,7 @@
                             periodBlock.className = 'period-block';
                             periodBlock.style.top = `${topPercentage}%`;
                             periodBlock.style.height = `${heightPercentage}%`;
-                            // Conditional rendering of the period label
+                            // Conditional rendering of the period label: only for "Advisory"
                             periodBlock.innerHTML = `${period.label === 'Advisory' ? `<span class="opacity-50">${period.label}</span>` : ''}`;
                             dayColumn.appendChild(periodBlock);
                         });
@@ -723,6 +732,28 @@
                     timeColumn.appendChild(timeLabelDiv);
                 }
             }
+
+            /**
+             * Toggles the color of an event element between its original color and a greyed-out state.
+             * @param {HTMLElement} eventElement - The event slot DOM element to toggle.
+             */
+            function toggleEventColor(eventElement) {
+                const originalColor = eventElement.dataset.originalColor;
+                let isGreyedOut = eventElement.dataset.isGreyedOut === 'true';
+
+                if (isGreyedOut) {
+                    // It's currently greyed out, revert to original color
+                    eventElement.classList.remove('greyed-out');
+                    eventElement.classList.add(originalColor);
+                    eventElement.dataset.isGreyedOut = 'false';
+                } else {
+                    // It's currently colorful, grey it out
+                    eventElement.classList.remove(originalColor);
+                    eventElement.classList.add('greyed-out');
+                    eventElement.dataset.isGreyedOut = 'true';
+                }
+            }
+
 
             /**
              * Renders all scheduled events (high school and college classes) onto the schedule grid.
@@ -759,6 +790,11 @@
 
                     const eventSlot = document.createElement('div');
                     eventSlot.className = `event-slot ${eventData.color} flex flex-col items-center justify-center text-center p-1`;
+                    
+                    // Store original color and initial greyed-out state
+                    eventSlot.dataset.originalColor = eventData.color;
+                    eventSlot.dataset.isGreyedOut = 'false'; // Initialize as not greyed out
+
                     eventSlot.style.top = `${topPercentage}%`;
                     eventSlot.style.height = `${heightPercentage}%`;
                     eventSlot.title = `${eventData.name} (${eventData.startTime} - ${eventData.endTime})`; // Tooltip
@@ -774,7 +810,7 @@
                     eventTime.textContent = `${formatMinutesToTime(startMinutes)} - ${formatMinutesToTime(endMinutes)}`;
                     eventSlot.appendChild(eventTime);
                     
-                    // Store event data for modal
+                    // Store event data for modal (still available if modal is triggered differently)
                     eventSlot.dataset.name = eventData.name;
                     eventSlot.dataset.type = eventData.type;
                     eventSlot.dataset.day = eventData.day;
@@ -782,8 +818,12 @@
                     eventSlot.dataset.endTime = eventData.endTime;
                     eventSlot.dataset.period = eventData.period || ''; // Use empty string if no period
 
-                    // Attach click listener to show modal
-                    eventSlot.addEventListener('click', () => showEventModal(eventSlot.dataset));
+                    // Attach click listener for toggling color
+                    eventSlot.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Prevent clicks on parent elements if any
+                        toggleEventColor(eventSlot);
+                        // showEventModal(eventSlot.dataset); // Removed direct modal call as per request focus
+                    });
                     
                     // Store the DOM element reference on the eventData object
                     eventData.element = eventSlot;
@@ -989,6 +1029,57 @@
                 }
             });
 
+            // Panel Collapse/Expand Logic (for mobile)
+            function setupPanelToggle(panelId, toggleId) {
+                const panel = document.getElementById(panelId);
+                const toggleButton = document.getElementById(toggleId);
+                const panelContent = panel.querySelector('.panel-content');
+                const heading = panel.querySelector('h2');
+
+                const updatePanelState = () => {
+                    const isCollapsed = panel.classList.contains('collapsed');
+                    const isMobile = window.innerWidth <= 768;
+
+                    if (isMobile) {
+                        // Mobile: collapse vertically
+                        heading.style.display = 'block'; // Always show heading on mobile
+                        if (isCollapsed) {
+                            panelContent.style.display = 'none';
+                            toggleButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>'; // Arrow down
+                        } else {
+                            panelContent.style.display = 'block';
+                            toggleButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>'; // Arrow up
+                        }
+                    } else {
+                        // Desktop: collapse horizontally
+                        if (isCollapsed) {
+                            heading.style.display = 'none';
+                            panelContent.style.display = 'none';
+                            toggleButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>'; // Arrow right
+                        } else {
+                            heading.style.display = 'block';
+                            panelContent.style.display = 'block';
+                            toggleButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>'; // Arrow left
+                        }
+                    }
+                };
+
+                // Initial state setup
+                updatePanelState();
+
+                // Event listener for toggle button
+                toggleButton.addEventListener('click', () => {
+                    panel.classList.toggle('collapsed');
+                    updatePanelState();
+                });
+
+                // Update on window resize
+                window.addEventListener('resize', updatePanelState);
+            }
+
+            setupPanelToggle('collegePanel', 'collegePanelToggle');
+            setupPanelToggle('highSchoolPanel', 'highSchoolPanelToggle');
+
             // --- High School Course Management ---
 
             const hsCourseNameInput = document.getElementById('courseNameInput');
@@ -1141,10 +1232,14 @@
                     const startTimeInput = group.querySelector('.section-start-time-input').value.trim();
                     const endTimeInput = group.querySelector('.section-end-time-input').value.trim();
 
-                    const days = daysInput.split(',').map(d => d.trim()).filter(d => DAYS.includes(d));
+                    // Normalize input days to match the case in the DAYS array ('Mon', 'Tue', etc.)
+                    const originalDaysArray = daysInput.split(',').map(d => d.trim()).filter(d => d !== '');
+                    const parsedDays = originalDaysArray
+                                        .map(d => d.charAt(0).toUpperCase() + d.slice(1).toLowerCase())
+                                        .filter(d => DAYS.includes(d));
 
-                    if (days.length === 0 || !isValidTime(startTimeInput) || !isValidTime(endTimeInput)) {
-                        alert('Please ensure all section fields are filled correctly and times are in HH:MM format (e.g., 09:00).');
+                    if (parsedDays.length !== originalDaysArray.length || !isValidTime(startTimeInput) || !isValidTime(endTimeInput)) {
+                        alert('Please ensure all section fields are filled correctly, days are valid (Mon, Tue, etc.), and times are in HH:MM format (e.g., 09:00).');
                         isValid = false;
                         return;
                     }
@@ -1158,7 +1253,7 @@
                         return;
                     }
                     
-                    sections.push({ days, startTime: startTimeInput, endTime: endTimeInput });
+                    sections.push({ days: parsedDays, startTime: startTimeInput, endTime: endTimeInput });
                 });
 
                 if (!isValid) return; // Stop if any section input was invalid
