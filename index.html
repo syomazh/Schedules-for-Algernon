@@ -82,7 +82,7 @@
 
             .day-header {
                 background-color: var(--header-bg-color);
-                color: var(--text-color);
+                color: var(--main-text-color); /* Changed from --text-color to --main-text-color */
                 font-weight: 600; /* semibold */
                 padding: 0.75rem 0.5rem; /* py-3 px-2 */
                 text-align: center;
@@ -141,8 +141,8 @@
                 background-color: rgba(255, 255, 255, 0.05); /* Very subtle overlay */
                 border-bottom: 1px dashed var(--border-color); /* Soft period divider */
                 padding: 0.25rem;
+                color: var(--main-text-color); /* Changed from --text-color to --main-text-color */
                 font-size: 0.75rem; /* text-xs */
-                color: var(--text-color);
                 overflow: hidden;
                 z-index: 1; /* Ensure periods are behind events */
             }
@@ -165,8 +165,7 @@
 
             .current-time-line {
                 position: absolute;
-                left: 80px; /* Offset by time column width */
-                right: 0;
+                /* Adjust left/right to span the correct columns within schedule-content */
                 height: 2px;
                 background-color: #ef4444; /* red-500 */
                 z-index: 20;
@@ -210,27 +209,50 @@
             /* Panel Specific Styles */
             .controls-panel {
                 background-color: var(--panel-bg);
-                transition: max-width 0.3s ease-in-out, padding 0.3s ease-in-out, background-color 0.3s, color 0.3s;
+                transition: max-width 0.3s ease-in-out, padding 0.3s ease-in-out, background-color 0.3s, color 0.3s, height 0.3s ease-in-out; /* Added height for mobile collapse */
                 overflow: hidden; /* Hide overflowing content during transition */
                 flex-shrink: 0; /* Prevent panel from shrinking below its content */
+                border-radius: 0.75rem; /* rounded-xl */
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
             }
 
-            .controls-panel.collapsed {
-                max-width: 50px; /* Adjust this value to control how much it collapses */
-                padding-left: 0.5rem;
-                padding-right: 0.5rem;
+            /* Desktop Collapse */
+            @media (min-width: 769px) {
+                .controls-panel.collapsed {
+                    max-width: 50px; /* Adjust this value to control how much it collapses */
+                    padding-left: 0.5rem;
+                    padding-right: 0.5rem;
+                }
+
+                .controls-panel.collapsed .panel-content {
+                    display: none; /* Hide the content when collapsed */
+                }
+
+                .controls-panel.collapsed .panel-header {
+                    justify-content: center; /* Center toggle button when collapsed */
+                }
+
+                .controls-panel.collapsed h2 {
+                    display: none; /* Hide heading when collapsed */
+                }
             }
 
-            .controls-panel.collapsed .panel-content {
-                display: none; /* Hide the content when collapsed */
-            }
-
-            .controls-panel.collapsed .panel-header {
-                justify-content: center; /* Center toggle button when collapsed */
-            }
-
-            .controls-panel.collapsed h2 {
-                display: none; /* Hide heading when collapsed */
+            /* Mobile Collapse */
+            @media (max-width: 768px) {
+                .controls-panel.collapsed {
+                    height: 50px; /* Collapse height-wise on small screens */
+                    padding-top: 0.5rem;
+                    padding-bottom: 0.5rem;
+                }
+                .controls-panel.collapsed .panel-content {
+                    display: none;
+                }
+                .controls-panel.collapsed .panel-header {
+                    justify-content: flex-start; /* Revert to start alignment for header */
+                }
+                .controls-panel.collapsed h2 {
+                    display: block; /* Show heading on small screen collapse */
+                }
             }
 
             .controls-panel h2 {
@@ -344,7 +366,7 @@
     </head>
     <body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
         <div class="flex justify-between items-center w-full max-w-7xl mb-6">
-            <h1 id="pageTitle" class="text-3xl md:text-4xl font-bold page-title"> F̶l̶o̶w̶e̶r̶s̶ Schedules for Algernon</h1>
+            <h1 id="pageTitle" class="text-3xl md:text-4xl font-bold page-title">Schedules for Algernon</h1>
             <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <svg id="sunIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M2 12h1m15.325-4.475l.707-.707M3.968 19.032l.707-.707m0-11.314l-.707-.707m11.314 0l.707.707"></path></svg>
                 <svg id="moonIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -355,7 +377,10 @@
             <!-- Left Panel for College Courses -->
             <div id="collegePanel" class="controls-panel w-full md:w-1/4 p-6 rounded-xl shadow-xl space-y-6">
                 <div class="panel-header flex justify-between items-center">
-                    <h2 class="text-2xl font-bold mb-4">Add College Course</h2>
+                    <h2 class="text-2xl font-bold">Add College Course</h2>
+                    <button id="collegePanelToggle" class="md:hidden p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
                 </div>
                 <div class="panel-content space-y-6">
                     <div>
@@ -369,7 +394,7 @@
                                 <input type="number" id="numCollegeSectionsInput" min="1" value="1" class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 <button id="generateCollegeSectionInputsBtn" class="mt-2 w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500">Generate Section Inputs</button>
                             </div>
-                            <div id="collegeSectionInputsContainer" class="space-y-4 border border-dashed rounded-md p-4">
+                            <div id="collegeSectionInputsContainer" class="space-y-4 border border-dashed rounded-md p-4 section-input-group">
                                 <!-- Dynamic section inputs will go here -->
                             </div>
                             <button id="addCollegeCourseBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Add College Course</button>
@@ -413,7 +438,10 @@
             <!-- Right Panel for High School Courses -->
             <div id="highSchoolPanel" class="controls-panel w-full md:w-1/4 p-6 rounded-xl shadow-xl space-y-6">
                 <div class="panel-header flex justify-between items-center">
-                    <h2 class="text-2xl font-bold mb-4">Add High School Course</h2>
+                    <h2 class="text-2xl font-bold">Add High School Course</h2>
+                    <button id="highSchoolPanelToggle" class="md:hidden p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
                 </div>
                 <div class="panel-content space-y-6">
                     <div>
@@ -460,21 +488,11 @@
                     this.name = name;
                     this.periodHours = periodHours; // Array of period strings
                     this.color = color;
-                    this.type = 'School Class';
+                    this.type = 'High School Class'; // Explicitly set type for display
                     this.renderableEvents = [];
 
                     const normalDays = ['Mon', 'Tue', 'Fri'];
-                    const blockDaysMap = {
-                        '1st Hour': { day: 'Wed', start: '07:40', end: '09:13' },
-                        'Advisory': { day: 'Wed', start: '09:20', end: '10:53' },
-                        '2nd Hour': { day: 'Wed', start: '10:53', end: '13:10' }, // Overlaps lunch
-                        '3rd Hour': { day: 'Wed', start: '13:17', end: '14:50' },
-                        '4th Hour': { day: 'Thu', start: '07:40', end: '09:13' },
-                        '5th Hour': { day: 'Thu', start: '09:20', end: '10:53' },
-                        '6th Hour': { day: 'Thu', start: '10:53', end: '13:10' }, // Overlaps lunch
-                        '7th Hour': { day: 'Thu', start: '13:17', end: '14:50' }
-                    };
-
+                    
                     this.periodHours.forEach(periodHour => {
                         // Add events for normal days (Mon, Tue, Fri)
                         normalDays.forEach(day => {
@@ -492,13 +510,26 @@
                             }
                         });
 
-                        // Add event for the block day
-                        const blockInfo = blockDaysMap[periodHour];
-                        if (blockInfo && SCHOOL_HOUR_SCHEDULE[blockInfo.day][periodHour]) { // Check if the block day period exists
-                            const times = SCHOOL_HOUR_SCHEDULE[blockInfo.day][periodHour];
+                        // Add event for block days (Wed, Thu) if applicable
+                        // These are predefined in SCHOOL_HOUR_SCHEDULE by period name, 
+                        // so we can directly check if the period exists for Wed or Thu
+                        if (SCHOOL_HOUR_SCHEDULE['Wed'][periodHour]) {
+                            const times = SCHOOL_HOUR_SCHEDULE['Wed'][periodHour];
                             this.renderableEvents.push({
                                 name: this.name,
-                                day: blockInfo.day,
+                                day: 'Wed',
+                                startTime: times.start,
+                                endTime: times.end,
+                                color: this.color,
+                                type: this.type,
+                                period: periodHour
+                            });
+                        }
+                        if (SCHOOL_HOUR_SCHEDULE['Thu'][periodHour]) {
+                            const times = SCHOOL_HOUR_SCHEDULE['Thu'][periodHour];
+                            this.renderableEvents.push({
+                                name: this.name,
+                                day: 'Thu',
                                 startTime: times.start,
                                 endTime: times.end,
                                 color: this.color,
@@ -511,12 +542,12 @@
             }
 
             class CollegeClass {
-                // sections is now an array of objects: [{ days: [], startTime: '', endTime: '' }, ...]
+                // sections is an array of objects: [{ days: [], startTime: '', endTime: '' }, ...]
                 constructor(name, sections, color) {
                     this.name = name;
                     this.sections = sections; // Array of section objects
                     this.color = color;
-                    this.type = 'College Class';
+                    this.type = 'College Class'; // Explicitly set type for display
                     this.renderableEvents = []; // This will hold the actual events to be rendered
 
                     this.sections.forEach(section => {
@@ -541,7 +572,7 @@
                     '2nd Hour': { start: '08:37', end: '09:29' },
                     '3rd Hour': { start: '09:34', end: '10:26' },
                     '4th Hour': { start: '10:31', end: '11:23' },
-                    '5th Hour': { start: '11:23', end: '12:56' },
+                    '5th Hour': { start: '11:23', end: '12:56' }, // Includes lunch overlap example
                     '6th Hour': { start: '13:01', end: '13:53' },
                     '7th Hour': { start: '13:58', end: '14:50' },
                 },
@@ -550,20 +581,20 @@
                     '2nd Hour': { start: '08:37', end: '09:29' },
                     '3rd Hour': { start: '09:34', end: '10:26' },
                     '4th Hour': { start: '10:31', end: '11:23' },
-                    '5th Hour': { start: '11:23', end: '12:56' },
+                    '5th Hour': { start: '11:23', end: '12:56' }, // Includes lunch overlap example
                     '6th Hour': { start: '13:01', end: '13:53' },
                     '7th Hour': { start: '13:58', end: '14:50' },
                 },
                 'Wed': {
                     '1st Hour': { start: '07:40', end: '09:13' },
                     'Advisory': { start: '09:20', end: '10:53' },
-                    '2nd Hour': { start: '10:53', end: '13:10' },
+                    '2nd Hour': { start: '10:53', end: '13:10' }, // Includes lunch overlap example
                     '3rd Hour': { start: '13:17', end: '14:50' },
                 },
                 'Thu': {
                     '4th Hour': { start: '07:40', end: '09:13' },
                     '5th Hour': { start: '09:20', end: '10:53' },
-                    '6th Hour': { start: '10:53', end: '13:10' },
+                    '6th Hour': { start: '10:53', end: '13:10' }, // Includes lunch overlap example
                     '7th Hour': { start: '13:17', end: '14:50' },
                 },
                 'Fri': {
@@ -571,41 +602,62 @@
                     '2nd Hour': { start: '08:37', end: '09:29' },
                     '3rd Hour': { start: '09:34', end: '10:26' },
                     '4th Hour': { start: '10:31', end: '11:23' },
-                    '5th Hour': { start: '11:23', end: '12:56' },
+                    '5th Hour': { start: '11:23', end: '12:56' }, // Includes lunch overlap example
                     '6th Hour': { start: '13:01', end: '13:53' },
                     '7th Hour': { start: '13:58', end: '14:50' },
                 }
             };
 
+            // Pre-process SCHOOL_HOUR_SCHEDULE for easier period block rendering
+            // Moved this declaration before its usage in renderPeriodBlocks
+            const schoolPeriods = {
+                'Mon': [], 'Tue': [], 'Wed': [], 'Thu': [], 'Fri': []
+            };
+
+            // Populate schoolPeriods with period details from SCHOOL_HOUR_SCHEDULE
+            Object.keys(SCHOOL_HOUR_SCHEDULE).forEach(day => {
+                for (const periodName in SCHOOL_HOUR_SCHEDULE[day]) {
+                    const { start, end } = SCHOOL_HOUR_SCHEDULE[day][periodName];
+                    schoolPeriods[day].push({ name: periodName, start, end, label: periodName });
+                }
+                // Sort periods by start time for correct rendering order
+                schoolPeriods[day].sort((a, b) => {
+                    const [aHour, aMin] = a.start.split(':').map(Number);
+                    const [bHour, bMin] = b.start.split(':').map(Number);
+                    if (aHour !== bHour) return aHour - bHour;
+                    return aMin - bMin;
+                });
+            });
+
             const courses = []; // Array to hold all course objects
-
-
-            // Example Course Objects
-            //const courses = [
-                //new SchoolClass('High School Class', ['1st Hour', '4th Hour', '5th Hour', 'Advisory'], 'bg-custom-blue'),
-                //new CollegeClass('College Class', [
-                    //{ days: ['Wed', 'Fri'], startTime: '14:00', endTime: '15:00' },
-                    //{ days: ['Tue', 'Thu'], startTime: '08:00', endTime: '09:00' }
-                //], //'bg-custom-yellow'),
-            //];
 
             // Available colors for new courses
             const availableColors = [
-                'bg-custom-green', 'bg-custom-purple', 'bg-custom-pink',
-                'bg-custom-teal', 'bg-custom-orange', 'bg-custom-red-500'
+                'bg-custom-blue', 'bg-custom-green', 'bg-custom-purple', 'bg-custom-yellow',
+                'bg-custom-pink', 'bg-custom-teal', 'bg-custom-orange', 'bg-custom-red-500'
             ];
             let colorIndex = 0; // To cycle through colors
 
             const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-            const START_HOUR = 7;
-            const END_HOUR = 15;
-            const TOTAL_MINUTES_SPAN = (END_HOUR - START_HOUR) * 60;
+            const START_HOUR = 7; // Schedule starts at 7 AM
+            const END_HOUR = 15; // Schedule ends at 3 PM (15:00)
+            const TOTAL_MINUTES_SPAN = (END_HOUR - START_HOUR) * 60; // Total minutes in the visible schedule
 
+            /**
+             * Converts a time string (HH:MM) to minutes from the START_HOUR.
+             * @param {string} timeStr - The time string (e.g., '08:30').
+             * @returns {number} The time in minutes relative to START_HOUR.
+             */
             function timeToMinutes(timeStr) {
                 const [hours, minutes] = timeStr.split(':').map(Number);
                 return (hours - START_HOUR) * 60 + minutes;
             }
 
+            /**
+             * Formats minutes (relative to START_HOUR) into a user-friendly time string (HH:MM AM/PM).
+             * @param {number} minutes - The minutes from START_HOUR.
+             * @returns {string} The formatted time string.
+             */
             function formatMinutesToTime(minutes) {
                 const totalMinutes = START_HOUR * 60 + minutes;
                 const hours = Math.floor(totalMinutes / 60);
@@ -615,48 +667,77 @@
                 return `${displayHours}:${mins.toString().padStart(2, '0')} ${ampm}`;
             }
 
+            /**
+             * Renders the dashed period blocks on the schedule grid.
+             * These blocks visually represent the standard school period times.
+             */
             function renderPeriodBlocks() {
                 DAYS.forEach(day => {
                     const dayColumn = document.getElementById(`${day.toLowerCase()}Column`);
-                    schoolPeriods[day].forEach(period => {
-                        const startMinutes = timeToMinutes(period.start);
-                        const endMinutes = timeToMinutes(period.end);
-                        const durationMinutes = endMinutes - startMinutes;
+                    if (dayColumn) {
+                        // Clear existing period blocks to prevent duplicates on re-render
+                        dayColumn.querySelectorAll('.period-block').forEach(block => block.remove());
 
-                        const topPercentage = (startMinutes / TOTAL_MINUTES_SPAN) * 100;
-                        const heightPercentage = (durationMinutes / TOTAL_MINUTES_SPAN) * 100;
+                        schoolPeriods[day].forEach(period => {
+                            const startMinutes = timeToMinutes(period.start);
+                            const endMinutes = timeToMinutes(period.end);
+                            const durationMinutes = endMinutes - startMinutes;
 
-                        const periodBlock = document.createElement('div');
-                        periodBlock.className = 'period-block';
-                        periodBlock.style.top = `${topPercentage}%`;
-                        periodBlock.style.height = `${heightPercentage}%`;
-                        periodBlock.innerHTML = `<div class="p-1">${period.label}</div>`;
-                        dayColumn.appendChild(periodBlock);
-                    });
+                            const topPercentage = (startMinutes / TOTAL_MINUTES_SPAN) * 100;
+                            const heightPercentage = (durationMinutes / TOTAL_MINUTES_SPAN) * 100;
+
+                            const periodBlock = document.createElement('div');
+                            periodBlock.className = 'period-block';
+                            periodBlock.style.top = `${topPercentage}%`;
+                            periodBlock.style.height = `${heightPercentage}%`;
+                            // Conditional rendering of the period label
+                            periodBlock.innerHTML = `${period.label === 'Advisory' ? `<span class="opacity-50">${period.label}</span>` : ''}`;
+                            dayColumn.appendChild(periodBlock);
+                        });
+                    }
                 });
             }
 
-            function renderTimeLabels() {
+            /**
+             * Renders the time labels along the left side of the schedule grid.
+             */
+            function renderTimeLabels() { // Renamed from renderTimeColumn
                 const timeColumn = document.getElementById('timeColumn');
-                const intervalMinutes = 60;
-                for (let i = 0; i <= TOTAL_MINUTES_SPAN; i += intervalMinutes) {
-                    const labelTime = formatMinutesToTime(i);
+                if (!timeColumn) return;
+
+                // Clear existing time labels
+                timeColumn.innerHTML = '';
+
+                for (let i = START_HOUR; i <= END_HOUR; i++) {
+                    const hourInMinutes = (i - START_HOUR) * 60;
+                    const topPercentage = (hourInMinutes / TOTAL_MINUTES_SPAN) * 100;
+
                     const timeLabelDiv = document.createElement('div');
                     timeLabelDiv.className = 'time-label';
-                    timeLabelDiv.style.top = `${(i / TOTAL_MINUTES_SPAN) * 100}%`;
-                    timeLabelDiv.textContent = labelTime;
+                    timeLabelDiv.style.top = `${topPercentage}%`; // Position at the start of the hour
+                    
+                    const displayHour = i % 12 === 0 ? 12 : i % 12;
+                    const ampm = i < 12 ? 'AM' : 'PM';
+                    timeLabelDiv.textContent = `${displayHour}:${'00'} ${ampm}`; // Ensure minutes are '00'
+                    
                     timeColumn.appendChild(timeLabelDiv);
                 }
             }
 
-            function renderCourses() {
-                const dayColumns = {};
+            /**
+             * Renders all scheduled events (high school and college classes) onto the schedule grid.
+             * It clears existing events and re-renders them based on the 'courses' array.
+             */
+            function renderCourses() { // Renamed from renderEvents
+                // Clear existing events from all day columns
                 DAYS.forEach(day => {
-                    const column = document.getElementById(`${day.toLowerCase()}Column`);
-                    if (column) column.innerHTML = ''; // Clear existing events
-                    dayColumns[day] = column;
+                    const dayColumn = document.getElementById(`${day.toLowerCase()}Column`);
+                    if (dayColumn) {
+                        dayColumn.querySelectorAll('.event-slot').forEach(eventEl => eventEl.remove());
+                    }
                 });
 
+                // Iterate through all courses and their renderable events
                 const allRenderableEvents = [];
                 courses.forEach(course => {
                     allRenderableEvents.push(...course.renderableEvents);
@@ -666,7 +747,7 @@
                 const eventsByDay = {};
                 DAYS.forEach(day => eventsByDay[day] = []);
                 allRenderableEvents.forEach(eventData => {
-                    const dayColumn = dayColumns[eventData.day];
+                    const dayColumn = document.getElementById(`${eventData.day.toLowerCase()}Column`);
                     if (!dayColumn) return;
 
                     const startMinutes = timeToMinutes(eventData.startTime);
@@ -677,16 +758,32 @@
                     const heightPercentage = (durationMinutes / TOTAL_MINUTES_SPAN) * 100;
 
                     const eventSlot = document.createElement('div');
-                    eventSlot.className = `event-slot ${eventData.color} text-white truncate`;
+                    eventSlot.className = `event-slot ${eventData.color} flex flex-col items-center justify-center text-center p-1`;
                     eventSlot.style.top = `${topPercentage}%`;
                     eventSlot.style.height = `${heightPercentage}%`;
-                    eventSlot.style.width = `100%`; // Default to full width
-                    eventSlot.style.left = `0%`;   // Default to left-aligned
-                    eventSlot.innerHTML = `
-                        <p class="font-semibold text-white">${eventData.name}</p>
-                        <p class="text-xs text-gray-100">${eventData.startTime} - ${eventData.endTime}</p>
-                    `;
-                    eventSlot.addEventListener('click', () => showEventModal(eventData));
+                    eventSlot.title = `${eventData.name} (${eventData.startTime} - ${eventData.endTime})`; // Tooltip
+
+                    // Event content - name and time range
+                    const eventName = document.createElement('div');
+                    eventName.className = 'font-semibold truncate';
+                    eventName.textContent = eventData.name;
+                    eventSlot.appendChild(eventName);
+
+                    const eventTime = document.createElement('div');
+                    eventTime.className = 'text-xs opacity-90 truncate';
+                    eventTime.textContent = `${formatMinutesToTime(startMinutes)} - ${formatMinutesToTime(endMinutes)}`;
+                    eventSlot.appendChild(eventTime);
+                    
+                    // Store event data for modal
+                    eventSlot.dataset.name = eventData.name;
+                    eventSlot.dataset.type = eventData.type;
+                    eventSlot.dataset.day = eventData.day;
+                    eventSlot.dataset.startTime = eventData.startTime;
+                    eventSlot.dataset.endTime = eventData.endTime;
+                    eventSlot.dataset.period = eventData.period || ''; // Use empty string if no period
+
+                    // Attach click listener to show modal
+                    eventSlot.addEventListener('click', () => showEventModal(eventSlot.dataset));
                     
                     // Store the DOM element reference on the eventData object
                     eventData.element = eventSlot;
@@ -781,23 +878,39 @@
                 });
             }
 
+            /**
+             * Updates the position of the current time line on the schedule.
+             * The line is visible only within the schedule's active hours.
+             */
             function updateCurrentTimeLine() {
                 const currentTimeLine = document.getElementById('currentTimeLine');
                 const now = new Date();
                 const currentHour = now.getHours();
                 const currentMinute = now.getMinutes();
+                const currentDay = now.toLocaleDateString('en-US', { weekday: 'short' });
 
-                if (currentHour >= START_HOUR && currentHour < END_HOUR) {
-                    const minutesFromStart = (currentHour - START_HOUR) * 60 + currentMinute;
-                    const topPercentage = (minutesFromStart / TOTAL_MINUTES_SPAN) * 100;
-                    currentTimeLine.style.top = `${topPercentage}%`;
+                // Only show the line for Mon-Fri during schedule hours
+                const isWeekday = DAYS.includes(currentDay);
+                const isDuringHours = currentHour >= START_HOUR && currentHour <= END_HOUR;
+
+                if (isWeekday && isDuringHours) {
                     currentTimeLine.classList.remove('hidden');
+                    
+                    // Calculate position relative to START_HOUR
+                    const minutesSinceStart = (currentHour - START_HOUR) * 60 + currentMinute;
+                    const topPercentage = (minutesSinceStart / TOTAL_MINUTES_SPAN) * 100;
 
-                    const today = new Date().toLocaleString('en-US', { weekday: 'short' });
-                    const dayIndex = DAYS.indexOf(today);
+                    currentTimeLine.style.top = `${topPercentage}%`;
 
+                    // Position the line correctly over the current day's column
+                    const dayIndex = DAYS.indexOf(currentDay);
                     if (dayIndex !== -1) {
-                        currentTimeLine.style.gridColumn = `${dayIndex + 2} / span 1`;
+                        // The schedule content grid has 5 columns (index 0-4 for Mon-Fri)
+                        // The currentTimeLine is absolute positioned within the schedule-content which itself is grid-column 2 / span 5.
+                        // So its left should be 0, and its width should span across the entire schedule-content.
+                        currentTimeLine.style.left = '0';
+                        currentTimeLine.style.right = '0'; // Span full width of schedule-content
+                        currentTimeLine.style.gridColumn = `${dayIndex + 1}`; // Align within the schedule-content's grid
                     } else {
                         currentTimeLine.classList.add('hidden');
                     }
@@ -821,7 +934,7 @@
                 modalDays.textContent = eventDetails.day;
                 modalTime.textContent = `${eventDetails.startTime} - ${eventDetails.endTime}`;
 
-                if (eventDetails.type === 'School Class' && eventDetails.period) {
+                if (eventDetails.type === 'High School Class' && eventDetails.period) { // Changed 'School Class' to 'High School Class' for consistency
                     modalPeriod.classList.remove('hidden');
                     modalPeriodText.textContent = eventDetails.period;
                 } else {
@@ -872,7 +985,7 @@
                     localStorage.setItem('theme', 'light');
                 } else {
                     applyTheme('dark');
-                    localStorage.setItem('dark');
+                    localStorage.setItem('theme', 'dark'); // Corrected from localStorage.setItem('dark');
                 }
             });
 
@@ -886,13 +999,13 @@
             // Utility to parse user input for period hours for high school classes
             function parseHighSchoolPeriodHoursInput(inputString) {
                 const periodMap = {
-                    '1': '1st Hour', '1st': '1st Hour', '1st Hour': '1st Hour',
-                    '2': '2nd Hour', '2nd': '2nd Hour', '2nd Hour': '2nd Hour',
-                    '3': '3rd Hour', '3rd': '3rd Hour', '3rd Hour': '3rd Hour',
-                    '4': '4th Hour', '4th': '4th Hour', '4th Hour': '4th Hour',
-                    '5': '5th Hour', '5th': '5th Hour', '5th Hour': '5th Hour',
-                    '6': '6th Hour', '6th': '6th Hour', '6th Hour': '6th Hour',
-                    '7': '7th Hour', '7th': '7th Hour', '7th Hour': '7th Hour',
+                    '1': '1st Hour', '1st': '1st Hour', '1st hour': '1st Hour',
+                    '2': '2nd Hour', '2nd': '2nd Hour', '2nd hour': '2nd Hour',
+                    '3': '3rd Hour', '3rd': '3rd Hour', '3rd hour': '3rd Hour',
+                    '4': '4th Hour', '4th': '4th Hour', '4th hour': '4th Hour',
+                    '5': '5th Hour', '5th': '5th Hour', '5th hour': '5th Hour',
+                    '6': '6th Hour', '6th': '6th Hour', '6th hour': '6th Hour',
+                    '7': '7th Hour', '7th': '7th Hour', '7th hour': '7th Hour',
                     'advisory': 'Advisory', 'Advisory': 'Advisory'
                 };
                 return inputString.split(',')
@@ -905,7 +1018,7 @@
                 highSchoolCoursesList.innerHTML = '';
 
                 courses.forEach((course, index) => {
-                    if (course.type === 'School Class') {
+                    if (course.type === 'High School Class') { // Changed 'School Class' to 'High School Class'
                         const listItem = document.createElement('li');
                         listItem.className = 'flex justify-between items-center p-3 rounded-md shadow-sm list-item';
                         
@@ -1107,9 +1220,9 @@
 
             // Initial rendering and updates
             window.addEventListener('load', () => {
-                renderTimeLabels();
+                renderTimeLabels(); // Corrected function name
                 renderPeriodBlocks();
-                renderCourses();
+                renderCourses(); // Corrected function name
                 renderHighSchoolCoursesList();
                 renderCollegeCoursesList(); // Render college courses list on load
                 generateCollegeSectionInputs(); // Generate initial section inputs
@@ -1127,42 +1240,7 @@
                 renderCourses(); // Re-render dynamic courses with updated layout
 
                 updateCurrentTimeLine();
-
-                // Reset classes based on current screen size and panel's collapse state
-                if (isSmallScreen) {
-                    // On small screens, h2 is always visible. Manage rotation for vertical collapse.
-                    collegePanel.querySelector('h2').style.display = 'block'; 
-                    hsPanel.querySelector('h2').style.display = 'block'; 
-
-                    collegeToggle.classList.remove('rotated-left', 'rotated-right');
-                    collegeToggle.style.transform = collegePanel.classList.contains('collapsed') ? 'rotate(-90deg)' : 'rotate(90deg)';
-
-                    hsToggle.classList.remove('rotated-left', 'rotated-right');
-                    hsToggle.style.transform = hsPanel.classList.contains('collapsed') ? 'rotate(-90deg)' : 'rotate(90deg)';
-                    
-                } else {
-                    // On large screens, manage h2 visibility and rotation for horizontal collapse.
-                    collegePanel.querySelector('h2').style.display = collegePanel.classList.contains('collapsed') ? 'none' : 'block';
-                    hsPanel.querySelector('h2').style.display = hsPanel.classList.contains('collapsed') ? 'none' : 'block';
-
-                    collegeToggle.style.transform = ''; // Clear inline style
-                    if (collegePanel.classList.contains('collapsed')) {
-                        collegeToggle.classList.remove('rotated-left');
-                        collegeToggle.classList.add('rotated-right');
-                    } else {
-                        collegeToggle.classList.remove('rotated-right');
-                        collegeToggle.classList.add('rotated-left');
-                    }
-
-                    hsToggle.style.transform = ''; // Clear inline style
-                    if (hsPanel.classList.contains('collapsed')) {
-                        hsToggle.classList.remove('rotated-right');
-                        hsToggle.classList.add('rotated-left');
-                    } else {
-                        hsToggle.classList.remove('rotated-left');
-                        hsToggle.classList.add('rotated-right');
-                    }
-                }
+                // Removed the problematic panel resize logic here, as setupPanelToggle already handles it.
             });
 
         </script>
