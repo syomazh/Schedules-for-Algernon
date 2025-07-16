@@ -12,12 +12,14 @@ class ScheduleGenerator {
    * @param {Object} schoolHourSchedule - School period schedule structure
    */
   constructor(highSchoolCourses = [], collegeCourses = [], schoolHourSchedule = {}) {
+    // Define DAYS first before it's used in initializeEmptySchedule
+    this.DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    
     this.highSchoolCourses = highSchoolCourses;
     this.collegeCourses = collegeCourses;
     this.schoolHourSchedule = schoolHourSchedule;
     this.selectedCourses = [];
     this.schedule = this.initializeEmptySchedule();
-    this.DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
   }
 
   /**
