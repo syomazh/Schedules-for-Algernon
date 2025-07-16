@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -481,6 +481,7 @@
                         <button id="saveScheduleBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Save Schedule</button>
                         <input type="file" id="loadFileInput" class="hidden" accept=".txt,application/json">
                         <button id="loadScheduleBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Load Schedule</button>
+                        <button id="autoGenerateBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Auto Generate Schedule</button>
                     </div>
 
                 </div>
@@ -1391,6 +1392,11 @@
                 reader.readAsText(file);
             });
 
+
+            // Auto Generate Schedule Button
+            document.getElementById('autoGenerateBtn').addEventListener('click', () => {
+                alert('🚧 Auto Schedule Generation is under construction! 🚧');
+            });
 
             // Initial rendering and updates
             window.addEventListener('load', () => {
