@@ -89,16 +89,16 @@ function generateSchedule(courses, options = {}) {
         }
     });
     
-    // Placeholder: Enable events for highest importance courses
-    // For a real implementation, this would involve the actual scheduling algorithm
-    if (processedCourses.length > 0) {
-        const highestImportanceCourse = processedCourses[0];
-        if (highestImportanceCourse.renderableEvents) {
-            highestImportanceCourse.renderableEvents.forEach(event => {
-                event.isGreyedOut = false;  // Enable events for highest priority course
-            });
-        }
-    }
+    // // Placeholder: Enable events for highest importance courses
+    // // For a real implementation, this would involve the actual scheduling algorithm
+    // if (processedCourses.length > 0) {
+    //     const highestImportanceCourse = processedCourses[0];
+    //     if (highestImportanceCourse.renderableEvents) {
+    //         highestImportanceCourse.renderableEvents.forEach(event => {
+    //             event.isGreyedOut = false;  // Enable events for highest priority course
+    //         });
+    //     }
+    // }
     
     // Calculate total importance of scheduled courses
     // For the placeholder, we're just including the highest importance course
