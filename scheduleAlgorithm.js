@@ -18,7 +18,7 @@ if (typeof module !== 'undefined') {
 
 //alg that just makes all the courses greyed out
 
-function placeholderAlg(courses, options = {}) {
+function placeholderAlg1(courses, options = {}) {
     // Make a deep copy to avoid modifying original data
     const processedCourses = JSON.parse(JSON.stringify(courses));
     
@@ -119,17 +119,18 @@ function greedyAlg(courses, options = {}) {
     // Extract importance values from options, or use defaults
     const importanceValues = options.importanceValues || {};
     
-    // DEBUG: Log importance values being used
-    console.log("Importance values provided:", importanceValues);
+    // DEBUG: Log importance values being used - critical debugging statement
+    console.log("Importance values provided:", JSON.stringify(importanceValues));
     
     // Assign importance values to each course (default to 0.5 if not provided)
     processedCourses.forEach(course => {
         // Set importance from options or default to 0.5
+        const prevImportance = course.importance;
         course.importance = importanceValues[course.name] !== undefined ? 
-                            importanceValues[course.name] : 0.5;
+                          importanceValues[course.name] : 0.5;
         
-        // Debug importance assignment
-        console.log(`Course "${course.name}" assigned importance: ${course.importance}`);
+        // Debug importance assignment - show before and after values
+        console.log(`Course "${course.name}": ${prevImportance} → ${course.importance}`);
     });
     
     // Map short day names to full day names
@@ -154,7 +155,7 @@ function greedyAlg(courses, options = {}) {
 
     // Create prioritized index list based on importance
     const courseIndicesByPriority = [...Array(processedCourses.length).keys()]
-        .sort((a, b) => (processedCourses[b].importance || 0.5) - (processedCourses[a].importance || 0.5));
+        .sort((a, b) => processedCourses[b].importance - processedCourses[a].importance);
     
     // Debug priority ordering
     console.log("Courses in priority order:", courseIndicesByPriority.map(idx => ({
