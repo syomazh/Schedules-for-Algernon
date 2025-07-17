@@ -119,49 +119,15 @@ function greedyAlg(courses, options = {}) {
     // Extract importance values from options, or use defaults
     const importanceValues = options.importanceValues || {};
     
-    // DEBUG: Log importance values being used - critical debugging statement
-    console.log("Importance values provided:", JSON.stringify(importanceValues));
-    
     // Assign importance values to each course (default to 0.5 if not provided)
     processedCourses.forEach(course => {
-        // Set importance from options or default to 0.5
-        const prevImportance = course.importance;
         course.importance = importanceValues[course.name] !== undefined ? 
                           importanceValues[course.name] : 0.5;
-        
-        // Debug importance assignment - show before and after values
-        console.log(`Course "${course.name}": ${prevImportance} → ${course.importance}`);
     });
     
-    // Map short day names to full day names
-    const dayMap = {
-        'Mon': 'Monday',
-        'Tue': 'Tuesday',
-        'Wed': 'Wednesday',
-        'Thu': 'Thursday',
-        'Fri': 'Friday'
-    };
-
-    // Convert all day properties in events from short form to full form
-    processedCourses.forEach(course => {
-        if (course.renderableEvents) {
-            course.renderableEvents.forEach(event => {
-                if (dayMap[event.day]) {
-                    event.day = dayMap[event.day];
-                }
-            });
-        }
-    });
-
     // Create prioritized index list based on importance
     const courseIndicesByPriority = [...Array(processedCourses.length).keys()]
         .sort((a, b) => processedCourses[b].importance - processedCourses[a].importance);
-    
-    // Debug priority ordering
-    console.log("Courses in priority order:", courseIndicesByPriority.map(idx => ({
-        name: processedCourses[idx].name,
-        importance: processedCourses[idx].importance
-    })));
     
     // Set all events to greyed out initially
     processedCourses.forEach(course => {
@@ -172,46 +138,41 @@ function greedyAlg(courses, options = {}) {
         }
     });
 
-    // Create a schedule representation
-    const schedule = {
-        Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {}
-    };
+    // Create a schedule representation for time conflict checking
+    const schedule = {};
+    for (const day of ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']) {
+        schedule[day] = [];
+    }
     
+    // Track which courses have been scheduled
+    const scheduledCourses = new Set();
+
     // Helper function to check if an event conflicts with current schedule
-    function hasConflict(event, courseIndex) {
+    function hasConflict(event) {
         const day = event.day;
         const startTime = event.startTime;
         const endTime = event.endTime;
         
-        // Check if this time slot is already occupied
-        for (const scheduleKey in schedule[day]) {
-            const occupiedCourseIndex = schedule[day][scheduleKey];
-            // Skip if it's the same course
-            if (occupiedCourseIndex === courseIndex) continue;
+        // Convert times to minutes for easier comparison
+        const [startHour, startMin] = startTime.split(':').map(Number);
+        const [endHour, endMin] = endTime.split(':').map(Number);
+        const eventStartMinutes = startHour * 60 + startMin;
+        const eventEndMinutes = endHour * 60 + endMin;
+        
+        // Check against all scheduled events for this day
+        for (const scheduledEvent of schedule[day]) {
+            const [schStartHour, schStartMin] = scheduledEvent.startTime.split(':').map(Number);
+            const [schEndHour, schEndMin] = scheduledEvent.endTime.split(':').map(Number);
+            const schStartMinutes = schStartHour * 60 + schStartMin;
+            const schEndMinutes = schEndHour * 60 + schEndMin;
             
-            // Find the actual event that's occupying this slot
-            const occupiedEvent = processedCourses[occupiedCourseIndex].renderableEvents.find(
-                e => {
-                    if (e.period) {
-                        return e.day === day && e.period === scheduleKey && !e.isGreyedOut;
-                    } else {
-                        return e.day === day && `${e.startTime}-${e.endTime}` === scheduleKey && !e.isGreyedOut;
-                    }
-                }
-            );
-            
-            if (!occupiedEvent) continue;
-            
-            // Check for time overlap
-            if (!(endTime <= occupiedEvent.startTime || startTime >= occupiedEvent.endTime)) {
+            // Check if there's an overlap
+            if (!(eventEndMinutes <= schStartMinutes || eventStartMinutes >= schEndMinutes)) {
                 return true; // Conflict detected
             }
         }
         return false;
     }
-    
-    // Track which courses have been scheduled
-    const scheduledCourses = new Set();
 
     // Process courses in priority order
     for (const courseIndex of courseIndicesByPriority) {
@@ -219,7 +180,6 @@ function greedyAlg(courses, options = {}) {
         
         // Skip if course has no events
         if (!course.renderableEvents || course.renderableEvents.length === 0) {
-            console.log(`Skipping ${course.name}: No renderable events`);
             continue;
         }
         
@@ -227,148 +187,156 @@ function greedyAlg(courses, options = {}) {
 
         if (isHighSchool) {
             // Group events by day
-            const eventsByDay = {};
+            const eventsByDay = {
+                'Mon': [], 'Tue': [], 'Wed': [], 'Thu': [], 'Fri': []
+            };
+            
             course.renderableEvents.forEach(event => {
-                if (!eventsByDay[event.day]) eventsByDay[event.day] = [];
                 eventsByDay[event.day].push(event);
             });
             
-            const requiredDays = ['Monday', 'Tuesday', 'Friday'];
-            const blockDays = ['Wednesday', 'Thursday'];
-            const scheduledDays = new Set();
+            // Try to schedule one period for each normal day (Mon, Tue, Fri)
+            // and one block day (Wed or Thu)
+            const normalDays = ['Mon', 'Tue', 'Fri'];
+            const blockDays = ['Wed', 'Thu'];
+            const scheduledEvents = [];
+            let allNormalDaysScheduled = true;
+            let blockDayScheduled = false;
             
-            // Try to schedule for each required day
-            for (const day of requiredDays) {
-                if (!eventsByDay[day]) continue;
-                
-                const dayEvents = eventsByDay[day].sort((a, b) => a.period - b.period);
-                
-                for (const event of dayEvents) {
-                    if (!hasConflict(event, courseIndex)) {
-                        event.isGreyedOut = false;
-                        scheduledDays.add(day);
-                        const scheduleKey = event.period || `${event.startTime}-${event.endTime}`;
-                        schedule[day][scheduleKey] = courseIndex;
-                        break; // We only need one period per day
-                    }
+            // First try normal days
+            for (const day of normalDays) {
+                if (eventsByDay[day].length === 0) {
+                    // If this course isn't offered on a required day, we can't schedule it
+                    allNormalDaysScheduled = false;
+                    break;
                 }
-            }
-            
-            // Try to schedule exactly ONE block day
-            let hasScheduledBlockDay = false;
-            
-            for (const day of blockDays) {
-                if (hasScheduledBlockDay) break;
                 
-                if (!eventsByDay[day]) continue;
-                
-                const dayEvents = eventsByDay[day].sort((a, b) => a.period - b.period);
-                
-                for (const event of dayEvents) {
-                    if (!hasConflict(event, courseIndex)) {
-                        event.isGreyedOut = false;
-                        scheduledDays.add(day);
-                        const scheduleKey = event.period || `${event.startTime}-${event.endTime}`;
-                        schedule[day][scheduleKey] = courseIndex;
-                        hasScheduledBlockDay = true;
-                        break;
-                    }
-                }
-            }
-            
-            const availableRequiredDays = requiredDays.filter(day => eventsByDay[day]);
-            const availableBlockDays = blockDays.filter(day => eventsByDay[day]);
-            
-            const hasAllAvailableRequiredDays = availableRequiredDays.every(day => scheduledDays.has(day));
-            const hasAvailableBlockDay = availableBlockDays.some(day => scheduledDays.has(day));
-            
-            if (hasAllAvailableRequiredDays && hasAvailableBlockDay) {
-                scheduledCourses.add(courseIndex);
-                console.log(`Scheduled high school course: ${course.name} (importance: ${course.importance})`);
-            } else {
-                // Requirements not met, grey out all events
-                course.renderableEvents.forEach(event => {
-                    event.isGreyedOut = true;
+                // Try each event for this day, sorted by start time
+                const dayEvents = [...eventsByDay[day]].sort((a, b) => {
+                    const [aHour, aMin] = a.startTime.split(':').map(Number);
+                    const [bHour, bMin] = b.startTime.split(':').map(Number);
+                    return (aHour * 60 + aMin) - (bHour * 60 + bMin);
                 });
                 
-                // Remove from schedule
-                for (const day in schedule) {
-                    for (const scheduleKey in schedule[day]) {
-                        if (schedule[day][scheduleKey] === courseIndex) {
-                            delete schedule[day][scheduleKey];
-                        }
-                    }
-                }
-            }
-        } else {
-            // Handle college courses
-            const eventsBySections = {};
-            course.renderableEvents.forEach(event => {
-                if (!event.section) {
-                    const sectionKey = `${event.day}-${event.startTime}`;
-                    if (!eventsBySections[sectionKey]) eventsBySections[sectionKey] = [];
-                    eventsBySections[sectionKey].push(event);
-                } else {
-                    if (!eventsBySections[event.section]) eventsBySections[event.section] = [];
-                    eventsBySections[event.section].push(event);
-                }
-            });
-            
-            let sectionScheduled = false;
-            
-            for (const section in eventsBySections) {
-                const sectionEvents = eventsBySections[section];
-                let sectionHasConflict = false;
-                
-                for (const event of sectionEvents) {
-                    if (hasConflict(event, courseIndex)) {
-                        sectionHasConflict = true;
+                let dayScheduled = false;
+                for (const event of dayEvents) {
+                    if (!hasConflict(event)) {
+                        scheduledEvents.push(event);
+                        schedule[day].push({
+                            courseIndex,
+                            startTime: event.startTime,
+                            endTime: event.endTime
+                        });
+                        dayScheduled = true;
                         break;
                     }
                 }
                 
-                if (!sectionHasConflict) {
-                    sectionEvents.forEach(event => {
-                        event.isGreyedOut = false;
-                        const scheduleKey = event.period || `${event.startTime}-${event.endTime}`;
-                        schedule[event.day][scheduleKey] = courseIndex;
-                    });
-                    
-                    scheduledCourses.add(courseIndex);
-                    sectionScheduled = true;
-                    console.log(`Scheduled college course: ${course.name} (importance: ${course.importance})`);
+                if (!dayScheduled) {
+                    allNormalDaysScheduled = false;
                     break;
                 }
             }
             
-            if (!sectionScheduled) {
-                course.renderableEvents.forEach(event => {
-                    event.isGreyedOut = true;
+            // Then try block days, but only if all normal days were scheduled
+            if (allNormalDaysScheduled) {
+                for (const day of blockDays) {
+                    if (blockDayScheduled) break;
+                    
+                    if (eventsByDay[day].length > 0) {
+                        const dayEvents = [...eventsByDay[day]].sort((a, b) => {
+                            const [aHour, aMin] = a.startTime.split(':').map(Number);
+                            const [bHour, bMin] = b.startTime.split(':').map(Number);
+                            return (aHour * 60 + aMin) - (bHour * 60 + bMin);
+                        });
+                        
+                        for (const event of dayEvents) {
+                            if (!hasConflict(event)) {
+                                scheduledEvents.push(event);
+                                schedule[day].push({
+                                    courseIndex,
+                                    startTime: event.startTime,
+                                    endTime: event.endTime
+                                });
+                                blockDayScheduled = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // If we scheduled all normal days and at least one block day, mark course as scheduled
+            if (allNormalDaysScheduled && blockDayScheduled) {
+                scheduledCourses.add(courseIndex);
+                
+                // Mark scheduled events as not greyed out
+                scheduledEvents.forEach(event => {
+                    event.isGreyedOut = false;
                 });
+            } else {
+                // If requirements weren't met, remove any tentative schedule entries
+                for (const day in schedule) {
+                    schedule[day] = schedule[day].filter(e => e.courseIndex !== courseIndex);
+                }
+            }
+            
+        } else {
+            // Handle college courses - group by section
+            const sections = [];
+            const sectionMap = new Map();
+            
+            // Group events by section (based on unique start/end time patterns)
+            course.renderableEvents.forEach(event => {
+                const sectionKey = `${event.startTime}-${event.endTime}`;
+                if (!sectionMap.has(sectionKey)) {
+                    sectionMap.set(sectionKey, sections.length);
+                    sections.push([]);
+                }
+                sections[sectionMap.get(sectionKey)].push(event);
+            });
+            
+            // Try each section
+            let sectionScheduled = false;
+            for (const section of sections) {
+                let canScheduleSection = true;
+                
+                // Check if entire section can be scheduled without conflicts
+                for (const event of section) {
+                    if (hasConflict(event)) {
+                        canScheduleSection = false;
+                        break;
+                    }
+                }
+                
+                if (canScheduleSection) {
+                    // Schedule all events in this section
+                    section.forEach(event => {
+                        event.isGreyedOut = false;
+                        schedule[event.day].push({
+                            courseIndex,
+                            startTime: event.startTime,
+                            endTime: event.endTime
+                        });
+                    });
+                    
+                    scheduledCourses.add(courseIndex);
+                    sectionScheduled = true;
+                    break;
+                }
             }
         }
     }
     
-    // Debug the courses that were scheduled
-    console.log("Scheduled courses:");
-    for (const idx of scheduledCourses) {
-        console.log(`- ${processedCourses[idx].name} (importance: ${processedCourses[idx].importance || 0.5})`);
-    }
-    
     // Calculate total importance of scheduled courses
     const totalImportance = Array.from(scheduledCourses).reduce((sum, idx) => {
-        const course = processedCourses[idx];
-        const importance = course.importance !== undefined ? course.importance : 0.5;
-        console.log(`Adding importance for ${course.name}: ${importance}`);
-        return sum + importance;
+        return sum + processedCourses[idx].importance;
     }, 0);
-    
-    console.log(`Final schedule: ${scheduledCourses.size} courses, total importance: ${totalImportance}`);
     
     return {
         courses: processedCourses,
-        totalImportance: totalImportance,
-        message: `Schedule generated with greedy algorithm (${scheduledCourses.size} courses)`
+        totalImportance: totalImportance.toFixed(2),
+        message: `Schedule generated with ${scheduledCourses.size} courses (total importance: ${totalImportance.toFixed(2)})`
     };
 }
 
