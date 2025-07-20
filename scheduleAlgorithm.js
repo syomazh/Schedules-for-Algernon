@@ -17,7 +17,6 @@ if (typeof module !== 'undefined') {
 
 
 //alg that just makes all the courses greyed out
-
 function placeholderAlg1(courses, options = {}) {
     // Make a deep copy to avoid modifying original data
     const processedCourses = JSON.parse(JSON.stringify(courses));
@@ -111,7 +110,7 @@ function placeholderAlg2(courses, options = {}) {
     };
 }
 
-
+//greedy algorithm for scheduling courses based on importance
 function greedyAlg(courses, options = {}) {
     // Make a deep copy to avoid modifying original data
     const processedCourses = JSON.parse(JSON.stringify(courses));
