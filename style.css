@@ -1,0 +1,364 @@
+/* Custom styles for dark mode and soft colors */
+            :root {
+                --bg-color: #f0f4f8; /* Light background for overall body */
+                --main-text-color: #1a202c; /* Near-black for main titles and body text in light mode */
+                --panel-heading-color: #1a202c; /* Explicitly dark for panel headings */
+                --label-color: #4a5568; /* Slightly softer dark for labels in light mode */
+                --secondary-text-color: #718096; /* Darker grey for secondary text in light mode */
+                --border-color: #e2e8f0; /* Light gray border */
+                --header-bg-color: #cbd5e1; /* Medium gray for day headers */
+                --period-time-bg: #e2e8f0; /* Background for time column */
+                --period-time-text: #475569; /* Text for time column */
+                --overlay-bg: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay for modal */
+                --modal-bg: #ffffff; /* White modal background */
+
+                /* Variables for panel styling */
+                --panel-bg: #ffffff; /* Light background for control panels */
+                --panel-item-bg: #f8fafc; /* Lighter background for list items/section groups */
+                --input-bg: #ffffff; /* White background for inputs */
+                --input-text: #1a202c; /* Dark text for inputs in light mode */
+                --input-border: #d1d5db; /* Light border for inputs */
+            }
+
+            .dark {
+                --bg-color: #1e293b; /* Dark slate background */
+                --main-text-color: #f8fafc; /* Lightest text in dark mode */
+                --panel-heading-color: #f8fafc; /* Explicitly light for panel headings */
+                --label-color: #cbd5e1; /* Lighter grey for labels in dark mode */
+                --secondary-text-color: #a0aec0; /* Lighter grey for secondary text in dark mode */
+                --border-color: #334155; /* Darker border */
+                --header-bg-color: #33415e; /* Darker gray for headers */
+                --period-time-bg: #475569;
+                --period-time-text: #e2e8f0;
+                --overlay-bg: rgba(0, 0, 0, 0.7); /* Darker overlay */
+                --modal-bg: #334155; /* Dark modal background */
+
+                /* Dark mode variables for panel styling */
+                --panel-bg: #1f2937; /* Darker background for control panels */
+                --panel-item-bg: #374151; /* Even darker for list items/section groups */
+                --input-bg: #334155;
+                --input-text: #f8fafc;
+                --input-border: #4b5563;
+            }
+
+            body {
+                background-color: var(--bg-color);
+                color: var(--main-text-color); /* General body text color */
+                font-family: "Inter", sans-serif;
+                transition: background-color 0.3s, color 0.3s;
+            }
+
+            /* Main page title */
+            .page-title {
+                color: var(--main-text-color);
+            }
+
+            .calendar-grid {
+                display: grid;
+                grid-template-columns: 80px repeat(5, 1fr); /* Time column + 5 days */
+                grid-template-rows: auto minmax(0, 1fr); /* Header row + content row */
+                border: 1px solid var(--border-color);
+                border-radius: 0.75rem; /* rounded-xl */
+                overflow: hidden;
+                background-color: var(--bg-color);
+            }
+
+            .day-header, .time-slot, .period-block, .event-slot, .current-time-line {
+                border-color: var(--border-color);
+            }
+
+            .day-header:first-child {
+                border-right: 1px solid var(--border-color); /* Ensure the corner header has a right border */
+            }
+
+            .day-header {
+                background-color: var(--header-bg-color);
+                color: var(--main-text-color); /* Changed from --text-color to --main-text-color */
+                font-weight: 600; /* semibold */
+                padding: 0.75rem 0.5rem; /* py-3 px-2 */
+                text-align: center;
+                border-bottom: 1px solid var(--border-color);
+                border-right: 1px solid var(--border-color);
+            }
+
+            .day-header:last-child {
+                border-right: none;
+            }
+
+            .time-column {
+                grid-column: 1;
+                grid-row: 2;
+                padding-top: 0.5rem;
+                background-color: var(--period-time-bg);
+                color: var(--period-time-text);
+                font-size: 0.875rem; /* text-sm */
+                font-weight: 500; /* medium */
+                text-align: right;
+                border-right: 1px solid var(--border-color);
+                display: flex;
+                flex-direction: column;
+                position: relative;
+            }
+            .time-label {
+                position: absolute;
+                width: 100%;
+                padding-right: 0.5rem;
+                transform: translateY(-50%); /* Adjust to center vertically on the line */
+            }
+
+
+            .schedule-content {
+                grid-column: 2 / span 5;
+                grid-row: 2;
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                position: relative; /* For absolute positioning of events */
+            }
+
+            .day-column {
+                position: relative;
+                border-right: 1px solid var(--border-color);
+                height: 100%; /* Ensure day column takes full height of the schedule content */
+            }
+            .day-column:last-child {
+                border-right: none;
+            }
+
+            .period-block {
+                position: absolute;
+                left: 0;
+                width: 100%;
+                box-sizing: border-box;
+                background-color: rgba(255, 255, 255, 0.05); /* Very subtle overlay */
+                border-bottom: 1px dashed var(--border-color); /* Soft period divider */
+                padding: 0.25rem;
+                color: var(--main-text-color); /* Changed from --text-color to --main-text-color */
+                font-size: 0.75rem; /* text-xs */
+                overflow: hidden;
+                z-index: 1; /* Ensure periods are behind events */
+            }
+
+            .event-slot {
+                position: absolute;
+                left: 0;
+                box-sizing: border-box;
+                width: 100%;
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.5rem; /* rounded-lg */
+                font-size: 0.875rem; /* text-sm */
+                font-weight: 500; /* medium */
+                color: white; /* Event text color */
+                overflow: hidden;
+                cursor: pointer;
+                z-index: 10; /* Ensure events are on top */
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .current-time-line {
+                position: absolute;
+                /* Adjust left/right to span the correct columns within schedule-content */
+                height: 2px;
+                background-color: #ef4444; /* red-500 */
+                z-index: 20;
+                pointer-events: none; /* Allow clicks to pass through */
+            }
+
+            /* Modal styles */
+            .modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-color: var(--overlay-bg);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+
+            .modal-content {
+                background-color: var(--modal-bg);
+                padding: 2rem;
+                border-radius: 0.75rem; /* rounded-xl */
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+                max-width: 500px;
+                width: 90%;
+                color: var(--main-text-color); /* Modal content text */
+            }
+
+            /* Color classes for events - using Tailwind's default colors with opacity */
+            .bg-custom-blue { background-color: #60a5fa; } /* blue-400 */
+            .bg-custom-green { background-color: #4ade80; } /* green-400 */
+            .bg-custom-purple { background-color: #a78bfa; } /* violet-400 */
+            .bg-custom-yellow { background-color: #fbbf24; } /* amber-400 */
+            .bg-custom-pink { background-color: #f472b6; } /* pink-400 */
+            .bg-custom-teal { background-color: #2dd4bf; } /* teal-400 */
+            .bg-custom-orange { background-color: #fb923c; } /* orange-400 */
+            .bg-custom-red-500 { background-color: #ef4444; } /* red-500 */
+
+            /* New CSS for greyed-out state */
+            .event-slot.greyed-out {
+                background-color: #9ca3af; /* Tailwind gray-400 */
+                opacity: 0.5; /* Make it visually distinct */
+            }
+            .dark .event-slot.greyed-out {
+                background-color: #4b5563; /* Tailwind gray-600 */
+            }
+
+            /* Panel Specific Styles */
+            .controls-panel {
+                background-color: var(--panel-bg);
+                transition: max-width 0.3s ease-in-out, padding 0.3s ease-in-out, background-color 0.3s, color 0.3s, height 0.3s ease-in-out; /* Added height for mobile collapse */
+                overflow: hidden; /* Hide overflowing content during transition */
+                flex-shrink: 0; /* Prevent panel from shrinking below its content */
+                border-radius: 0.75rem; /* rounded-xl */
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Desktop Collapse */
+            @media (min-width: 769px) {
+                .controls-panel.collapsed {
+                    max-width: 50px; /* Adjust this value to control how much it collapses */
+                    padding-left: 0.5rem;
+                    padding-right: 0.5rem;
+                }
+
+                .controls-panel.collapsed .panel-content {
+                    display: none; /* Hide the content when collapsed */
+                }
+
+                .controls-panel.collapsed .panel-header {
+                    justify-content: center; /* Center toggle button when collapsed */
+                }
+
+                .controls-panel.collapsed h2 {
+                    display: none; /* Hide heading when collapsed */
+                }
+            }
+
+            /* Mobile Collapse */
+            @media (max-width: 768px) {
+                .controls-panel.collapsed {
+                    height: 50px; /* Collapse height-wise on small screens */
+                    padding-top: 0.5rem;
+                    padding-bottom: 0.5rem;
+                }
+                .controls-panel.collapsed .panel-content {
+                    display: none;
+                }
+                .controls-panel.collapsed .panel-header {
+                    justify-content: flex-start; /* Revert to start alignment for header */
+                }
+                .controls-panel.collapsed h2 {
+                    display: block; /* Show heading on small screen collapse */
+                }
+            }
+
+            .controls-panel h2 {
+                color: var(--panel-heading-color);
+            }
+
+            .controls-panel label {
+                color: var(--label-color);
+            }
+
+            .controls-panel p.text-xs { /* For secondary text like examples in panels */
+                color: var(--secondary-text-color);
+            }
+
+            .controls-panel .list-item { /* For high school and college course list items */
+                background-color: var(--panel-item-bg);
+                border: 1px solid var(--input-border); /* Apply border to items */
+                color: var(--main-text-color); /* Text color for list items */
+                transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+            }
+            
+            .controls-panel .list-item span.text-sm { /* For secondary text like section counts */
+                color: var(--secondary-text-color);
+            }
+
+            .controls-panel .section-input-group { /* For college section input groups */
+                background-color: var(--panel-item-bg);
+                border: 1px dashed var(--input-border); /* Dashed border for section group */
+                color: var(--main-text-color); /* Text color for section group */
+                transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+            }
+
+            .controls-panel .section-input-group h4,
+            .controls-panel .section-input-group label {
+                color: var(--panel-heading-color); /* Ensure nested titles and labels follow theme */
+            }
+
+            .controls-panel input[type="text"],
+            .controls-panel input[type="number"] {
+                background-color: var(--input-bg);
+                color: var(--input-text);
+                border-color: var(--input-border);
+                transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+            }
+            /* Style for text inside alert-like messages */
+            .text-red-500 {
+                color: #ef4444; /* Ensure this remains red */
+            }
+
+            /* Adjust Main Content Area to allow schedule to grow */
+            .main-content-area {
+                display: flex;
+                flex-direction: row; /* Default for larger screens */
+                width: 100%;
+                max-width: 7xl;
+                gap: 1.5rem; /* gap-6 */
+            }
+
+            .main-content-area > .schedule-panel {
+                flex-grow: 1; /* Allow the schedule to take up available space */
+                min-width: 50%; /* Ensure schedule doesn't get too small */
+            }
+
+
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .calendar-grid {
+                    grid-template-columns: 60px repeat(5, 1fr);
+                }
+                .time-column {
+                    font-size: 0.75rem; /* text-xs */
+                }
+                .event-slot {
+                    font-size: 0.75rem; /* text-xs */
+                    padding: 0.125rem 0.25rem;
+                }
+                .day-header {
+                    font-size: 0.875rem; /* text-sm */
+                    padding: 0.5rem 0.25rem;
+                }
+                /* Adjust layout for small screens */
+                .main-content-area {
+                    flex-direction: column;
+                }
+                .schedule-panel {
+                    width: 100%;
+                }
+                /* Ensure panels stack vertically on small screens */
+                .controls-panel {
+                    width: 100%;
+                    max-width: none; /* Remove max-width restriction on small screens */
+                    margin-bottom: 1rem; /* Add some space between panels */
+                    padding: 1.5rem; /* py-6 px-6 */
+                }
+                .controls-panel.collapsed {
+                    max-width: none; /* No horizontal collapse on small screens */
+                    padding: 1rem; /* py-4 px-4 */
+                    height: 50px; /* Collapse height-wise on small screens */
+                }
+                .controls-panel.collapsed .panel-content {
+                    display: none;
+                }
+                .controls-panel.collapsed .panel-header {
+                    justify-content: flex-start; /* Revert to start alignment for header */
+                }
+                .controls-panel.collapsed h2 {
+                    display: block; /* Show heading on small screen collapse */
+                }
+            }
