@@ -1,6 +1,7 @@
 // ==============================================================================
 // CONSTANTS
 // =============================================================================-
+//#region 
 
 const SCHOOL_HOUR_SCHEDULE = {
   Mon: {
@@ -71,9 +72,12 @@ const START_HOUR = 7; // Schedule starts at 7 AM
 const END_HOUR = 15; // Schedule ends at 3 PM (15:00)
 const TOTAL_MINUTES_SPAN = (END_HOUR - START_HOUR) * 60; // Total minutes in the visible schedule
 
+//#endregion
+
 // ==============================================================================
 // DOCUMENT CONFIGURATIONS
 // ==============================================================================
+//#region 
 
 // --- Document Elements ---
 const eventModal = document.getElementById("eventModal");
@@ -118,9 +122,12 @@ const collegeSectionInputsContainer = document.getElementById(
 const addCollegeCourseBtn = document.getElementById("addCollegeCourseBtn");
 const collegeCoursesList = document.getElementById("collegeCoursesList");
 
+//#endregion
+
 // ==============================================================================
 // DATA STRUCTURES
 // ==============================================================================
+//#region 
 
 class SchoolClass {
   constructor(name, periodHours, color) {
@@ -209,9 +216,12 @@ class CollegeClass {
   }
 }
 
+//#endregion
+
 // ==============================================================================
 // UTIL FUNCTIONS
 // ==============================================================================
+//#region 
 
 /**
  * Converts a time string (HH:MM) to minutes from the START_HOUR.
@@ -282,9 +292,12 @@ function parseHighSchoolPeriodHoursInput(inputString) {
     .map((s) => periodMap[s.toLowerCase()] || s);
 }
 
+//#endregion
+
 // ==============================================================================
 // RENDERING FUNCTIONS
 // ==============================================================================
+//#region 
 
 /**
  * Renders the dashed period blocks on the schedule grid.
@@ -800,9 +813,12 @@ function removeCourse(index) {
   renderCollegeCoursesList();
 }
 
+// #endregion
+
 // ==============================================================================
 // EVENT HANDLERS/LISTENERS
 // ==============================================================================
+// #region
 
 closeModalBtn.addEventListener("click", () => {
   eventModal.classList.add("hidden");
@@ -1029,9 +1045,12 @@ loadFileInput.addEventListener("change", (event) => {
   reader.readAsText(file);
 });
 
+//#endregion
+
 // ============================
 // initial rendering and updates
 // ============================
+// #region
 
 window.addEventListener("load", () => {
   renderTimeLabels(); // Corrected function name
@@ -1057,9 +1076,12 @@ window.addEventListener("resize", () => {
   // Removed the problematic panel resize logic here, as setupPanelToggle already handles it.
 });
 
+// #endregion
+
 // ==============================================================================
 // SILLY STUFF TO DO ON SCRIPT START
 // ==============================================================================
+// #region
 
 // Populate schoolPeriods with period details from SCHOOL_HOUR_SCHEDULE
 Object.keys(SCHOOL_HOUR_SCHEDULE).forEach((day) => {
@@ -1092,3 +1114,5 @@ if (savedTheme) {
 
 setupPanelToggle("collegePanel", "collegePanelToggle");
 setupPanelToggle("highSchoolPanel", "highSchoolPanelToggle");
+
+// #endregion
