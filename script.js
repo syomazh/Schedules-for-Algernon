@@ -41,9 +41,8 @@ const SCHOOL_HOUR_SCHEDULE = {
     "5th Hour": { start: "11:23", end: "12:56" }, // Includes lunch overlap example
     "6th Hour": { start: "13:01", end: "13:53" },
     "7th Hour": { start: "13:58", end: "14:50" },
-  },// Pre-process SCHOOL_HOUR_SCHEDULE for easier period block rendering
+  }, // Pre-process SCHOOL_HOUR_SCHEDULE for easier period block rendering
 };
-
 
 const schoolPeriods = {
   Mon: [],
@@ -55,9 +54,8 @@ const schoolPeriods = {
 
 const courses = []; // Array to hold all course objects
 
-
 const availableColors = [
-    // Available colors for new courses
+  // Available colors for new courses
   "bg-custom-blue",
   "bg-custom-green",
   "bg-custom-purple",
@@ -105,10 +103,18 @@ const moonIcon = document.getElementById("moonIcon");
 
 // --- College Course Management ---
 
-const collegeCourseNameInput = document.getElementById("collegeCourseNameInput",);
-const numCollegeSectionsInput = document.getElementById("numCollegeSectionsInput",);
-const generateCollegeSectionInputsBtn = document.getElementById("generateCollegeSectionInputsBtn",);
-const collegeSectionInputsContainer = document.getElementById("collegeSectionInputsContainer",);
+const collegeCourseNameInput = document.getElementById(
+  "collegeCourseNameInput",
+);
+const numCollegeSectionsInput = document.getElementById(
+  "numCollegeSectionsInput",
+);
+const generateCollegeSectionInputsBtn = document.getElementById(
+  "generateCollegeSectionInputsBtn",
+);
+const collegeSectionInputsContainer = document.getElementById(
+  "collegeSectionInputsContainer",
+);
 const addCollegeCourseBtn = document.getElementById("addCollegeCourseBtn");
 const collegeCoursesList = document.getElementById("collegeCoursesList");
 
@@ -275,7 +281,6 @@ function parseHighSchoolPeriodHoursInput(inputString) {
     .filter((s) => s !== "")
     .map((s) => periodMap[s.toLowerCase()] || s);
 }
-
 
 // ==============================================================================
 // RENDERING FUNCTIONS
@@ -749,20 +754,20 @@ function setupPanelToggle(panelId, toggleId) {
  * Displays a validation message if the number of sections is invalid.
  */
 function generateCollegeSectionInputs() {
-    collegeSectionInputsContainer.innerHTML = ""; // Clear previous inputs
-    const numSections = parseInt(numCollegeSectionsInput.value);
+  collegeSectionInputsContainer.innerHTML = ""; // Clear previous inputs
+  const numSections = parseInt(numCollegeSectionsInput.value);
 
-    if (isNaN(numSections) || numSections <= 0) {
-        collegeSectionInputsContainer.innerHTML =
-            '<p class="text-sm text-red-500">Please enter a valid number of sections (1 or more).</p>';
-        return;
-    }
+  if (isNaN(numSections) || numSections <= 0) {
+    collegeSectionInputsContainer.innerHTML =
+      '<p class="text-sm text-red-500">Please enter a valid number of sections (1 or more).</p>';
+    return;
+  }
 
-    for (let i = 0; i < numSections; i++) {
-        const sectionDiv = document.createElement("div");
-        sectionDiv.className =
-            "section-input-group border border-dashed rounded-md p-3 space-y-2";
-        sectionDiv.innerHTML = `
+  for (let i = 0; i < numSections; i++) {
+    const sectionDiv = document.createElement("div");
+    sectionDiv.className =
+      "section-input-group border border-dashed rounded-md p-3 space-y-2";
+    sectionDiv.innerHTML = `
                                                 <h4 class="font-semibold">Section ${i + 1}</h4>
                                                 <div>
                                                         <label class="block text-sm font-medium">Days (comma-separated: Mon, Tue, Wed, Thu, Fri):</label>
@@ -779,8 +784,8 @@ function generateCollegeSectionInputs() {
                                                         </div>
                                                 </div>
                                         `;
-        collegeSectionInputsContainer.appendChild(sectionDiv);
-    }
+    collegeSectionInputsContainer.appendChild(sectionDiv);
+  }
 }
 
 /**
@@ -794,9 +799,6 @@ function removeCourse(index) {
   renderHighSchoolCoursesList(); // Re-render both lists to update indices and content
   renderCollegeCoursesList();
 }
-
-
-
 
 // ==============================================================================
 // EVENT HANDLERS/LISTENERS
@@ -1090,26 +1092,3 @@ if (savedTheme) {
 
 setupPanelToggle("collegePanel", "collegePanelToggle");
 setupPanelToggle("highSchoolPanel", "highSchoolPanelToggle");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
