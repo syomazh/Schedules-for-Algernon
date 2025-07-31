@@ -1,4 +1,121 @@
-// Data Structures for Classes
+// ==============================================================================
+// CONSTANTS
+// =============================================================================-
+
+const SCHOOL_HOUR_SCHEDULE = {
+  Mon: {
+    "1st Hour": { start: "07:40", end: "08:32" },
+    "2nd Hour": { start: "08:37", end: "09:29" },
+    "3rd Hour": { start: "09:34", end: "10:26" },
+    "4th Hour": { start: "10:31", end: "11:23" },
+    "5th Hour": { start: "11:23", end: "12:56" }, // Includes lunch overlap example
+    "6th Hour": { start: "13:01", end: "13:53" },
+    "7th Hour": { start: "13:58", end: "14:50" },
+  },
+  Tue: {
+    "1st Hour": { start: "07:40", end: "08:32" },
+    "2nd Hour": { start: "08:37", end: "09:29" },
+    "3rd Hour": { start: "09:34", end: "10:26" },
+    "4th Hour": { start: "10:31", end: "11:23" },
+    "5th Hour": { start: "11:23", end: "12:56" }, // Includes lunch overlap example
+    "6th Hour": { start: "13:01", end: "13:53" },
+    "7th Hour": { start: "13:58", end: "14:50" },
+  },
+  Wed: {
+    "1st Hour": { start: "07:40", end: "09:13" },
+    Advisory: { start: "09:20", end: "10:53" },
+    "2nd Hour": { start: "10:53", end: "13:10" }, // Includes lunch overlap example
+    "3rd Hour": { start: "13:17", end: "14:50" },
+  },
+  Thu: {
+    "4th Hour": { start: "07:40", end: "09:13" },
+    "5th Hour": { start: "09:20", end: "10:53" },
+    "6th Hour": { start: "10:53", end: "13:10" }, // Includes lunch overlap example
+    "7th Hour": { start: "13:17", end: "14:50" },
+  },
+  Fri: {
+    "1st Hour": { start: "07:40", end: "08:32" },
+    "2nd Hour": { start: "08:37", end: "09:29" },
+    "3rd Hour": { start: "09:34", end: "10:26" },
+    "4th Hour": { start: "10:31", end: "11:23" },
+    "5th Hour": { start: "11:23", end: "12:56" }, // Includes lunch overlap example
+    "6th Hour": { start: "13:01", end: "13:53" },
+    "7th Hour": { start: "13:58", end: "14:50" },
+  },// Pre-process SCHOOL_HOUR_SCHEDULE for easier period block rendering
+};
+
+
+const schoolPeriods = {
+  Mon: [],
+  Tue: [],
+  Wed: [],
+  Thu: [],
+  Fri: [],
+};
+
+const courses = []; // Array to hold all course objects
+
+
+const availableColors = [
+    // Available colors for new courses
+  "bg-custom-blue",
+  "bg-custom-green",
+  "bg-custom-purple",
+  "bg-custom-yellow",
+  "bg-custom-pink",
+  "bg-custom-teal",
+  "bg-custom-orange",
+  "bg-custom-red-500",
+];
+let colorIndex = 0; // To cycle through colors
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+const START_HOUR = 7; // Schedule starts at 7 AM
+const END_HOUR = 15; // Schedule ends at 3 PM (15:00)
+const TOTAL_MINUTES_SPAN = (END_HOUR - START_HOUR) * 60; // Total minutes in the visible schedule
+
+// ==============================================================================
+// DOCUMENT CONFIGURATIONS
+// ==============================================================================
+
+// --- Document Elements ---
+const eventModal = document.getElementById("eventModal");
+const modalTitle = document.getElementById("modalTitle");
+const modalType = document.getElementById("modalType");
+const modalDays = document.getElementById("modalDays");
+const modalTime = document.getElementById("modalTime");
+const modalPeriod = document.getElementById("modalPeriod");
+const modalPeriodText = document.getElementById("modalPeriodText");
+const closeModalBtn = document.getElementById("closeModal");
+
+// --- Save and Load Functionality ---
+const saveScheduleBtn = document.getElementById("saveScheduleBtn");
+const loadScheduleBtn = document.getElementById("loadScheduleBtn");
+const loadFileInput = document.getElementById("loadFileInput");
+
+// --- High School Course Management ---
+const hsCourseNameInput = document.getElementById("courseNameInput");
+const hsPeriodHoursInput = document.getElementById("periodHoursInput");
+const hsAddCourseBtn = document.getElementById("addCourseBtn");
+const highSchoolCoursesList = document.getElementById("highSchoolCoursesList");
+
+// --- Dark/light mode toggle ---
+const darkModeToggle = document.getElementById("darkModeToggle");
+const sunIcon = document.getElementById("sunIcon");
+const moonIcon = document.getElementById("moonIcon");
+
+// --- College Course Management ---
+
+const collegeCourseNameInput = document.getElementById("collegeCourseNameInput",);
+const numCollegeSectionsInput = document.getElementById("numCollegeSectionsInput",);
+const generateCollegeSectionInputsBtn = document.getElementById("generateCollegeSectionInputsBtn",);
+const collegeSectionInputsContainer = document.getElementById("collegeSectionInputsContainer",);
+const addCollegeCourseBtn = document.getElementById("addCollegeCourseBtn");
+const collegeCoursesList = document.getElementById("collegeCoursesList");
+
+// ==============================================================================
+// DATA STRUCTURES
+// ==============================================================================
+
 class SchoolClass {
   constructor(name, periodHours, color) {
     this.name = name;
@@ -86,96 +203,9 @@ class CollegeClass {
   }
 }
 
-const SCHOOL_HOUR_SCHEDULE = {
-  Mon: {
-    "1st Hour": { start: "07:40", end: "08:32" },
-    "2nd Hour": { start: "08:37", end: "09:29" },
-    "3rd Hour": { start: "09:34", end: "10:26" },
-    "4th Hour": { start: "10:31", end: "11:23" },
-    "5th Hour": { start: "11:23", end: "12:56" }, // Includes lunch overlap example
-    "6th Hour": { start: "13:01", end: "13:53" },
-    "7th Hour": { start: "13:58", end: "14:50" },
-  },
-  Tue: {
-    "1st Hour": { start: "07:40", end: "08:32" },
-    "2nd Hour": { start: "08:37", end: "09:29" },
-    "3rd Hour": { start: "09:34", end: "10:26" },
-    "4th Hour": { start: "10:31", end: "11:23" },
-    "5th Hour": { start: "11:23", end: "12:56" }, // Includes lunch overlap example
-    "6th Hour": { start: "13:01", end: "13:53" },
-    "7th Hour": { start: "13:58", end: "14:50" },
-  },
-  Wed: {
-    "1st Hour": { start: "07:40", end: "09:13" },
-    Advisory: { start: "09:20", end: "10:53" },
-    "2nd Hour": { start: "10:53", end: "13:10" }, // Includes lunch overlap example
-    "3rd Hour": { start: "13:17", end: "14:50" },
-  },
-  Thu: {
-    "4th Hour": { start: "07:40", end: "09:13" },
-    "5th Hour": { start: "09:20", end: "10:53" },
-    "6th Hour": { start: "10:53", end: "13:10" }, // Includes lunch overlap example
-    "7th Hour": { start: "13:17", end: "14:50" },
-  },
-  Fri: {
-    "1st Hour": { start: "07:40", end: "08:32" },
-    "2nd Hour": { start: "08:37", end: "09:29" },
-    "3rd Hour": { start: "09:34", end: "10:26" },
-    "4th Hour": { start: "10:31", end: "11:23" },
-    "5th Hour": { start: "11:23", end: "12:56" }, // Includes lunch overlap example
-    "6th Hour": { start: "13:01", end: "13:53" },
-    "7th Hour": { start: "13:58", end: "14:50" },
-  },
-};
-
-// Pre-process SCHOOL_HOUR_SCHEDULE for easier period block rendering
-const schoolPeriods = {
-  Mon: [],
-  Tue: [],
-  Wed: [],
-  Thu: [],
-  Fri: [],
-};
-
-// Populate schoolPeriods with period details from SCHOOL_HOUR_SCHEDULE
-Object.keys(SCHOOL_HOUR_SCHEDULE).forEach((day) => {
-  for (const periodName in SCHOOL_HOUR_SCHEDULE[day]) {
-    const { start, end } = SCHOOL_HOUR_SCHEDULE[day][periodName];
-    schoolPeriods[day].push({
-      name: periodName,
-      start,
-      end,
-      label: periodName,
-    });
-  }
-  // Sort periods by start time for correct rendering order
-  schoolPeriods[day].sort((a, b) => {
-    const [aHour, aMin] = a.start.split(":").map(Number);
-    const [bHour, bMin] = b.start.split(":").map(Number);
-    if (aHour !== bHour) return aHour - bHour;
-    return aMin - bMin;
-  });
-});
-
-const courses = []; // Array to hold all course objects
-
-// Available colors for new courses
-const availableColors = [
-  "bg-custom-blue",
-  "bg-custom-green",
-  "bg-custom-purple",
-  "bg-custom-yellow",
-  "bg-custom-pink",
-  "bg-custom-teal",
-  "bg-custom-orange",
-  "bg-custom-red-500",
-];
-let colorIndex = 0; // To cycle through colors
-
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-const START_HOUR = 7; // Schedule starts at 7 AM
-const END_HOUR = 15; // Schedule ends at 3 PM (15:00)
-const TOTAL_MINUTES_SPAN = (END_HOUR - START_HOUR) * 60; // Total minutes in the visible schedule
+// ==============================================================================
+// UTIL FUNCTIONS
+// ==============================================================================
 
 /**
  * Converts a time string (HH:MM) to minutes from the START_HOUR.
@@ -200,6 +230,56 @@ function formatMinutesToTime(minutes) {
   const displayHours = hours % 12 === 0 ? 12 : hours % 12;
   return `${displayHours}:${mins.toString().padStart(2, "0")} ${ampm}`;
 }
+
+// Validate time format (HH:MM)
+function isValidTime(timeStr) {
+  const regex = /^(?:2[0-3]|[01]?[0-9]):(?:[0-5]?[0-9])$/;
+  return regex.test(timeStr);
+}
+
+/**
+ * Parses a comma-separated string of high school period inputs and normalizes them to standard period names.
+ *
+ * @param {string} inputString - A comma-separated list of period identifiers (e.g., "1st, 2nd hour, Advisory").
+ * @returns {string[]} An array of normalized period names (e.g., ["1st Hour", "2nd Hour", "Advisory"]).
+ */
+function parseHighSchoolPeriodHoursInput(inputString) {
+  const periodMap = {
+    1: "1st Hour",
+    "1st": "1st Hour",
+    "1st hour": "1st Hour",
+    2: "2nd Hour",
+    "2nd": "2nd Hour",
+    "2nd hour": "2nd Hour",
+    3: "3rd Hour",
+    "3rd": "3rd Hour",
+    "3rd hour": "3rd Hour",
+    4: "4th Hour",
+    "4th": "4th Hour",
+    "4th hour": "4th Hour",
+    5: "5th Hour",
+    "5th": "5th Hour",
+    "5th hour": "5th Hour",
+    6: "6th Hour",
+    "6th": "6th Hour",
+    "6th hour": "6th Hour",
+    7: "7th Hour",
+    "7th": "7th Hour",
+    "7th hour": "7th Hour",
+    advisory: "Advisory",
+    Advisory: "Advisory",
+  };
+  return inputString
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s !== "")
+    .map((s) => periodMap[s.toLowerCase()] || s);
+}
+
+
+// ==============================================================================
+// RENDERING FUNCTIONS
+// ==============================================================================
 
 /**
  * Renders the dashed period blocks on the schedule grid.
@@ -493,15 +573,79 @@ function updateCurrentTimeLine() {
   }
 }
 
-const eventModal = document.getElementById("eventModal");
-const modalTitle = document.getElementById("modalTitle");
-const modalType = document.getElementById("modalType");
-const modalDays = document.getElementById("modalDays");
-const modalTime = document.getElementById("modalTime");
-const modalPeriod = document.getElementById("modalPeriod");
-const modalPeriodText = document.getElementById("modalPeriodText");
-const closeModalBtn = document.getElementById("closeModal");
+function renderHighSchoolCoursesList() {
+  highSchoolCoursesList.innerHTML = "";
 
+  courses.forEach((course, index) => {
+    if (course.type === "High School Class") {
+      // Changed 'School Class' to 'High School Class'
+      const listItem = document.createElement("li");
+      listItem.className =
+        "flex justify-between items-center p-3 rounded-md shadow-sm list-item";
+
+      listItem.innerHTML = `
+                            <span class="font-medium">${course.name}</span>
+                            <button data-index="${index}" class="remove-btn bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Remove</button>
+                        `;
+      highSchoolCoursesList.appendChild(listItem);
+    }
+  });
+
+  document
+    .querySelectorAll("#highSchoolCoursesList .remove-btn")
+    .forEach((button) => {
+      button.addEventListener("click", (event) => {
+        const indexToRemove = parseInt(event.target.dataset.index);
+        removeCourse(indexToRemove);
+      });
+    });
+}
+
+/**
+ * Renders the list of college courses in the sidebar
+ */
+function renderCollegeCoursesList() {
+  collegeCoursesList.innerHTML = ""; // Clear existing list
+
+  courses.forEach((course, index) => {
+    if (course.type === "College Class") {
+      const listItem = document.createElement("li");
+      listItem.className =
+        "flex justify-between items-center p-3 rounded-md shadow-sm list-item";
+
+      // Display only the course name and number of sections
+      const numSections = course.sections.length;
+      listItem.innerHTML = `
+                            <span class="font-medium">${course.name} <span class="text-sm">(${numSections} section${numSections === 1 ? "" : "s"})</span></span>
+                            <button data-index="${index}" class="remove-btn bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Remove</button>
+                        `;
+      collegeCoursesList.appendChild(listItem);
+    }
+  });
+
+  document
+    .querySelectorAll("#collegeCoursesList .remove-btn")
+    .forEach((button) => {
+      button.addEventListener("click", (event) => {
+        const indexToRemove = parseInt(event.target.dataset.index);
+        removeCourse(indexToRemove);
+      });
+    });
+}
+
+/**
+ * Displays the event modal with the provided event details.
+ * Populates the modal fields with event information such as name, type, day, and time.
+ * If the event is a "High School Class" and includes a period, the period is shown; otherwise, it is hidden.
+ *
+ * @param {Object} eventDetails - The details of the event to display in the modal.
+ * @param {string} eventDetails.name - The name of the event.
+ * @param {string} eventDetails.type - The type of the event (e.g., "High School Class").
+ * @param {string} eventDetails.day - The day the event occurs.
+ * @param {string} eventDetails.startTime - The start time of the event.
+ * @param {string} eventDetails.endTime - The end time of the event.
+ * @param {string} [eventDetails.period] - The period of the class (only for "High School Class" events).
+ */
 function showEventModal(eventDetails) {
   modalTitle.textContent = eventDetails.name;
   modalType.textContent = eventDetails.type;
@@ -519,20 +663,6 @@ function showEventModal(eventDetails) {
   eventModal.classList.remove("hidden");
 }
 
-closeModalBtn.addEventListener("click", () => {
-  eventModal.classList.add("hidden");
-});
-
-eventModal.addEventListener("click", (e) => {
-  if (e.target === eventModal) {
-    eventModal.classList.add("hidden");
-  }
-});
-
-const darkModeToggle = document.getElementById("darkModeToggle");
-const sunIcon = document.getElementById("sunIcon");
-const moonIcon = document.getElementById("moonIcon");
-
 function applyTheme(theme) {
   if (theme === "dark") {
     document.documentElement.classList.add("dark");
@@ -545,26 +675,22 @@ function applyTheme(theme) {
   }
 }
 
-const savedTheme = localStorage.getItem("theme");
-if (savedTheme) {
-  applyTheme(savedTheme);
-} else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-  applyTheme("dark");
-} else {
-  applyTheme("light");
-}
-
-darkModeToggle.addEventListener("click", () => {
-  if (document.documentElement.classList.contains("dark")) {
-    applyTheme("light");
-    localStorage.setItem("theme", "light");
-  } else {
-    applyTheme("dark");
-    localStorage.setItem("theme", "dark"); // Corrected from localStorage.setItem('dark');
-  }
-});
-
-// Panel Collapse/Expand Logic (for mobile)
+/**
+ * Sets up a toggleable panel that collapses/expands vertically on mobile and horizontally on desktop.
+ * The function manages the panel's state, updates the toggle button icon, and handles responsive behavior.
+ *
+ * @param {string} panelId - The ID of the panel element to be toggled.
+ * @param {string} toggleId - The ID of the button element that triggers the toggle action.
+ *
+ * The panel element should contain a child with the class "panel-content" and a heading (h2).
+ * The toggle button's inner HTML will be updated with appropriate SVG icons based on the state and viewport size.
+ *
+ * Responsive behavior:
+ * - On mobile (window width <= 768px): Collapses/expands the panel vertically, always showing the heading.
+ * - On desktop: Collapses/expands the panel horizontally, hiding the heading when collapsed.
+ *
+ * Event listeners are added for the toggle button (click) and window resize to update the panel state accordingly.
+ */
 function setupPanelToggle(panelId, toggleId) {
   const panel = document.getElementById(panelId);
   const toggleButton = document.getElementById(toggleId);
@@ -616,77 +742,85 @@ function setupPanelToggle(panelId, toggleId) {
   window.addEventListener("resize", updatePanelState);
 }
 
-setupPanelToggle("collegePanel", "collegePanelToggle");
-setupPanelToggle("highSchoolPanel", "highSchoolPanelToggle");
+/**
+ * Dynamically generates input fields for entering college course sections.
+ * Clears any previous inputs and creates a set of input groups based on the number specified.
+ * Each section includes fields for days, start time, and end time.
+ * Displays a validation message if the number of sections is invalid.
+ */
+function generateCollegeSectionInputs() {
+    collegeSectionInputsContainer.innerHTML = ""; // Clear previous inputs
+    const numSections = parseInt(numCollegeSectionsInput.value);
 
-// --- High School Course Management ---
-
-const hsCourseNameInput = document.getElementById("courseNameInput");
-const hsPeriodHoursInput = document.getElementById("periodHoursInput");
-const hsAddCourseBtn = document.getElementById("addCourseBtn");
-const highSchoolCoursesList = document.getElementById("highSchoolCoursesList");
-
-// Utility to parse user input for period hours for high school classes
-function parseHighSchoolPeriodHoursInput(inputString) {
-  const periodMap = {
-    1: "1st Hour",
-    "1st": "1st Hour",
-    "1st hour": "1st Hour",
-    2: "2nd Hour",
-    "2nd": "2nd Hour",
-    "2nd hour": "2nd Hour",
-    3: "3rd Hour",
-    "3rd": "3rd Hour",
-    "3rd hour": "3rd Hour",
-    4: "4th Hour",
-    "4th": "4th Hour",
-    "4th hour": "4th Hour",
-    5: "5th Hour",
-    "5th": "5th Hour",
-    "5th hour": "5th Hour",
-    6: "6th Hour",
-    "6th": "6th Hour",
-    "6th hour": "6th Hour",
-    7: "7th Hour",
-    "7th": "7th Hour",
-    "7th hour": "7th Hour",
-    advisory: "Advisory",
-    Advisory: "Advisory",
-  };
-  return inputString
-    .split(",")
-    .map((s) => s.trim())
-    .filter((s) => s !== "")
-    .map((s) => periodMap[s.toLowerCase()] || s);
-}
-
-function renderHighSchoolCoursesList() {
-  highSchoolCoursesList.innerHTML = "";
-
-  courses.forEach((course, index) => {
-    if (course.type === "High School Class") {
-      // Changed 'School Class' to 'High School Class'
-      const listItem = document.createElement("li");
-      listItem.className =
-        "flex justify-between items-center p-3 rounded-md shadow-sm list-item";
-
-      listItem.innerHTML = `
-                            <span class="font-medium">${course.name}</span>
-                            <button data-index="${index}" class="remove-btn bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Remove</button>
-                        `;
-      highSchoolCoursesList.appendChild(listItem);
+    if (isNaN(numSections) || numSections <= 0) {
+        collegeSectionInputsContainer.innerHTML =
+            '<p class="text-sm text-red-500">Please enter a valid number of sections (1 or more).</p>';
+        return;
     }
-  });
 
-  document
-    .querySelectorAll("#highSchoolCoursesList .remove-btn")
-    .forEach((button) => {
-      button.addEventListener("click", (event) => {
-        const indexToRemove = parseInt(event.target.dataset.index);
-        removeCourse(indexToRemove);
-      });
-    });
+    for (let i = 0; i < numSections; i++) {
+        const sectionDiv = document.createElement("div");
+        sectionDiv.className =
+            "section-input-group border border-dashed rounded-md p-3 space-y-2";
+        sectionDiv.innerHTML = `
+                                                <h4 class="font-semibold">Section ${i + 1}</h4>
+                                                <div>
+                                                        <label class="block text-sm font-medium">Days (comma-separated: Mon, Tue, Wed, Thu, Fri):</label>
+                                                        <input type="text" class="section-days-input mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., Mon, Wed, Fri">
+                                                </div>
+                                                <div class="flex gap-2">
+                                                        <div class="w-1/2">
+                                                                <label class="block text-sm font-medium">Start Time (HH:MM):</label>
+                                                                <input type="text" class="section-start-time-input mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., 09:00">
+                                                        </div>
+                                                        <div class="w-1/2">
+                                                                <label class="block text-sm font-medium">End Time (HH:MM):</label>
+                                                                <input type="text" class="section-end-time-input mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., 10:15">
+                                                        </div>
+                                                </div>
+                                        `;
+        collegeSectionInputsContainer.appendChild(sectionDiv);
+    }
 }
+
+/**
+ * Removes a course from the courses array at the specified index and updates the UI.
+ *
+ * @param {number} index - The index of the course to remove from the courses array.
+ */
+function removeCourse(index) {
+  courses.splice(index, 1);
+  renderCourses();
+  renderHighSchoolCoursesList(); // Re-render both lists to update indices and content
+  renderCollegeCoursesList();
+}
+
+
+
+
+// ==============================================================================
+// EVENT HANDLERS/LISTENERS
+// ==============================================================================
+
+closeModalBtn.addEventListener("click", () => {
+  eventModal.classList.add("hidden");
+});
+
+eventModal.addEventListener("click", (e) => {
+  if (e.target === eventModal) {
+    eventModal.classList.add("hidden");
+  }
+});
+
+darkModeToggle.addEventListener("click", () => {
+  if (document.documentElement.classList.contains("dark")) {
+    applyTheme("light");
+    localStorage.setItem("theme", "light");
+  } else {
+    applyTheme("dark");
+    localStorage.setItem("theme", "dark"); // Corrected from localStorage.setItem('dark');
+  }
+});
 
 hsAddCourseBtn.addEventListener("click", () => {
   const name = hsCourseNameInput.value.trim();
@@ -726,66 +860,6 @@ hsAddCourseBtn.addEventListener("click", () => {
   renderHighSchoolCoursesList();
 });
 
-// --- College Course Management ---
-
-const collegeCourseNameInput = document.getElementById(
-  "collegeCourseNameInput",
-);
-const numCollegeSectionsInput = document.getElementById(
-  "numCollegeSectionsInput",
-);
-const generateCollegeSectionInputsBtn = document.getElementById(
-  "generateCollegeSectionInputsBtn",
-);
-const collegeSectionInputsContainer = document.getElementById(
-  "collegeSectionInputsContainer",
-);
-const addCollegeCourseBtn = document.getElementById("addCollegeCourseBtn");
-const collegeCoursesList = document.getElementById("collegeCoursesList");
-
-// Dynamically generate input fields for college sections
-function generateCollegeSectionInputs() {
-  collegeSectionInputsContainer.innerHTML = ""; // Clear previous inputs
-  const numSections = parseInt(numCollegeSectionsInput.value);
-
-  if (isNaN(numSections) || numSections <= 0) {
-    collegeSectionInputsContainer.innerHTML =
-      '<p class="text-sm text-red-500">Please enter a valid number of sections (1 or more).</p>';
-    return;
-  }
-
-  for (let i = 0; i < numSections; i++) {
-    const sectionDiv = document.createElement("div");
-    sectionDiv.className =
-      "section-input-group border border-dashed rounded-md p-3 space-y-2";
-    sectionDiv.innerHTML = `
-                        <h4 class="font-semibold">Section ${i + 1}</h4>
-                        <div>
-                            <label class="block text-sm font-medium">Days (comma-separated: Mon, Tue, Wed, Thu, Fri):</label>
-                            <input type="text" class="section-days-input mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., Mon, Wed, Fri">
-                        </div>
-                        <div class="flex gap-2">
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium">Start Time (HH:MM):</label>
-                                <input type="text" class="section-start-time-input mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., 09:00">
-                            </div>
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium">End Time (HH:MM):</label>
-                                <input type="text" class="section-end-time-input mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., 10:15">
-                            </div>
-                        </div>
-                    `;
-    collegeSectionInputsContainer.appendChild(sectionDiv);
-  }
-}
-
-// Validate time format (HH:MM)
-function isValidTime(timeStr) {
-  const regex = /^(?:2[0-3]|[01]?[0-9]):(?:[0-5]?[0-9])$/;
-  return regex.test(timeStr);
-}
-
-// Add College Course button click handler
 addCollegeCourseBtn.addEventListener("click", () => {
   const name = collegeCourseNameInput.value.trim();
   if (!name) {
@@ -869,53 +943,10 @@ addCollegeCourseBtn.addEventListener("click", () => {
   renderCollegeCoursesList();
 });
 
-// Generate section inputs when number of sections changes
 generateCollegeSectionInputsBtn.addEventListener(
   "click",
   generateCollegeSectionInputs,
 );
-
-function renderCollegeCoursesList() {
-  collegeCoursesList.innerHTML = ""; // Clear existing list
-
-  courses.forEach((course, index) => {
-    if (course.type === "College Class") {
-      const listItem = document.createElement("li");
-      listItem.className =
-        "flex justify-between items-center p-3 rounded-md shadow-sm list-item";
-
-      // Display only the course name and number of sections
-      const numSections = course.sections.length;
-      listItem.innerHTML = `
-                            <span class="font-medium">${course.name} <span class="text-sm">(${numSections} section${numSections === 1 ? "" : "s"})</span></span>
-                            <button data-index="${index}" class="remove-btn bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Remove</button>
-                        `;
-      collegeCoursesList.appendChild(listItem);
-    }
-  });
-
-  document
-    .querySelectorAll("#collegeCoursesList .remove-btn")
-    .forEach((button) => {
-      button.addEventListener("click", (event) => {
-        const indexToRemove = parseInt(event.target.dataset.index);
-        removeCourse(indexToRemove);
-      });
-    });
-}
-
-// Generic remove course function (removes from main courses array and re-renders)
-function removeCourse(index) {
-  courses.splice(index, 1);
-  renderCourses();
-  renderHighSchoolCoursesList(); // Re-render both lists to update indices and content
-  renderCollegeCoursesList();
-}
-
-// --- Save and Load Functionality ---
-const saveScheduleBtn = document.getElementById("saveScheduleBtn");
-const loadScheduleBtn = document.getElementById("loadScheduleBtn");
-const loadFileInput = document.getElementById("loadFileInput");
 
 saveScheduleBtn.addEventListener("click", () => {
   const scheduleData = JSON.stringify(courses, null, 2); // Pretty print JSON
@@ -996,12 +1027,10 @@ loadFileInput.addEventListener("change", (event) => {
   reader.readAsText(file);
 });
 
-// Auto Generate Schedule Button
-document.getElementById("autoGenerateBtn").addEventListener("click", () => {
-  alert("🚧 Auto Schedule Generation is under construction! 🚧");
-});
+// ============================
+// initial rendering and updates
+// ============================
 
-// Initial rendering and updates
 window.addEventListener("load", () => {
   renderTimeLabels(); // Corrected function name
   renderPeriodBlocks();
@@ -1025,3 +1054,62 @@ window.addEventListener("resize", () => {
   updateCurrentTimeLine();
   // Removed the problematic panel resize logic here, as setupPanelToggle already handles it.
 });
+
+// ==============================================================================
+// SILLY STUFF TO DO ON SCRIPT START
+// ==============================================================================
+
+// Populate schoolPeriods with period details from SCHOOL_HOUR_SCHEDULE
+Object.keys(SCHOOL_HOUR_SCHEDULE).forEach((day) => {
+  for (const periodName in SCHOOL_HOUR_SCHEDULE[day]) {
+    const { start, end } = SCHOOL_HOUR_SCHEDULE[day][periodName];
+    schoolPeriods[day].push({
+      name: periodName,
+      start,
+      end,
+      label: periodName,
+    });
+  }
+  // Sort periods by start time for correct rendering order
+  schoolPeriods[day].sort((a, b) => {
+    const [aHour, aMin] = a.start.split(":").map(Number);
+    const [bHour, bMin] = b.start.split(":").map(Number);
+    if (aHour !== bHour) return aHour - bHour;
+    return aMin - bMin;
+  });
+});
+
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme) {
+  applyTheme(savedTheme);
+} else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+  applyTheme("dark");
+} else {
+  applyTheme("light");
+}
+
+setupPanelToggle("collegePanel", "collegePanelToggle");
+setupPanelToggle("highSchoolPanel", "highSchoolPanelToggle");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
